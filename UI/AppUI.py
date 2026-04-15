@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QSplitter
-from UI.Sidebar import Sidebar
-from UI.Project import Project
+from UI.Sidebar.Sidebar import Sidebar
+from UI.Project.Project import Project
 
 class AppUI(QMainWindow):
     def __init__(self):
