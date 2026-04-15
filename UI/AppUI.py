@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QSplitter
+from PySide6.QtWidgets import QMainWindow, QSplitter
 from UI.Sidebar.Sidebar import Sidebar
 from UI.Project.Project import Project
 
@@ -7,7 +7,9 @@ class AppUI(QMainWindow):
         super().__init__()
         self.sidebar = Sidebar()
         self.project = Project()
+
         self.splitter = QSplitter()
         self.splitter.addWidget(self.sidebar)
         self.splitter.addWidget(self.project)
+        self.splitter.setCollapsible(1, False)
         self.setCentralWidget(self.splitter)
