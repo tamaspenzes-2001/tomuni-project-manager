@@ -16,10 +16,12 @@ class App(AppUI):
     def writeSettings(self):
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("splitterSizes", self.splitter.saveState())
+        self.settings.setValue("sidebarSplitterSizes", self.sidebar.saveState())
 
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry", QByteArray()))
         self.splitter.restoreState(self.settings.value("splitterSizes", QByteArray()))
+        self.sidebar.restoreState(self.settings.value("sidebarSplitterSizes", QByteArray()))
 
     def closeEvent(self, event):
         self.writeSettings()
