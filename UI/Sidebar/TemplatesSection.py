@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QWidget, QLabel, QScrollArea, QPushButton, QVBoxLayout, QSizePolicy
+from PySide6.QtWidgets import QWidget, QDialog, QLabel, QScrollArea, QPushButton, QVBoxLayout, QSizePolicy
 from UI.Sidebar.TemplatesMenuEntry import TemplatesMenuEntry
+from UI.Dialogs.ProjectDialog import ProjectDialog
 
 class TemplatesSection(QWidget):
     def __init__(self):
@@ -22,7 +23,10 @@ class TemplatesSection(QWidget):
         self.setLayout(self.layout)
 
     def createTemplate(self):
-        text = "Hello World"
-        newTemplate = TemplatesMenuEntry(text)
-        # add new item above the stretch (QSpacerItem)
-        self.menuLayout.insertWidget(self.menuLayout.count() - 1, newTemplate)
+        dialog = ProjectDialog(template=True)
+        # print(name, phases)
+        result = dialog.exec()
+        if result == QDialog.Accepted:
+            newTemplate = TemplatesMenuEntry(dialog.resultName)
+            # add new item above the stretch (QSpacerItem)
+            self.menuLayout.insertWidget(self.menuLayout.count() - 1, newTemplate)
