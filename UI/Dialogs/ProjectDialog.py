@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import (QDialog, QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton,
                               QVBoxLayout, QHBoxLayout)
-from PySide6.QtCore import Qt, QRegularExpression
-from PySide6.QtGui import QRegularExpressionValidator
+from PySide6.QtCore import Qt
 from typing import List
 
 class ProjectDialog(QDialog):
