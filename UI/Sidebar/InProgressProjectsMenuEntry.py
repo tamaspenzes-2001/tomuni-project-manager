@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout
 import qtawesome as qta
+from UI.Sidebar.FinishedProjectsMenuEntry import FinishedProjectsMenuEntry
 
 class InProgressProjectsMenuEntry(QWidget):
     def __init__(self, name):
@@ -20,4 +21,8 @@ class InProgressProjectsMenuEntry(QWidget):
         pass
 
     def completeProject(self):
-        pass
+        projectsSection = self.parent().parent().parent().parent().parent().parent().parent()
+        finishedProjectsMenuLayout = projectsSection.finishedProjectsTab.menuLayout
+        finishedProject = FinishedProjectsMenuEntry(self.name.text())
+        finishedProjectsMenuLayout.insertWidget(finishedProjectsMenuLayout.count() - 1, finishedProject)
+        self.deleteLater()

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout
 
-class FinishedProjectsTab(QWidget):
+class FinishedProjectsMenuEntry(QWidget):
     def __init__(self, name):
         super().__init__()
         self.name = QLabel(name)

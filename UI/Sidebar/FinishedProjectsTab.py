@@ -8,3 +8,4 @@ class FinishedProjectsTab(QScrollArea):
         self.menuLayout.addStretch()
         self.menu.setLayout(self.menuLayout)
         self.setWidget(self.menu)
+        self.setWidgetResizable(True)
