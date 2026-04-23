@@ -1,7 +1,9 @@
-from PySide6.QtWidgets import QWidget, QLabel, QToolButton, QMenu, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QToolButton, QMenu, QDialog, QHBoxLayout
 from PySide6.QtGui import QAction
 import qtawesome as qta
 from typing import Dict
+from datetime import date
+from UI.Dialogs.ProjectDialog import ProjectDialog
 
 class ProjectHeader(QWidget):
     def __init__(self, projectData: Dict):
@@ -45,10 +47,15 @@ class ProjectHeader(QWidget):
         self.setLayout(self.layout)
 
     def modifyProjectSettings(self):
-        pass
+        dialog = ProjectDialog(data=self.projectData)
+        result = dialog.exec()
+        if result == QDialog.DialogCode.Accepted:
+            self.projectData["name"] = dialog.resultName
+            self.projectData["phases"] = dialog.resultPhases
+            self.name.setText(dialog.resultName)
 
     def createTemplate(self):
         pass
 
     def markAsCompleted(self):
-        pass
+        self.date.setText(f"{self.projectData["date"]} - {date.today()}")

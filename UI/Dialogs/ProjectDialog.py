@@ -1,10 +1,10 @@
 from PySide6.QtWidgets import (QDialog, QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton,
                               QVBoxLayout, QHBoxLayout)
 from PySide6.QtCore import Qt
-from typing import List
+from typing import Dict
 
 class ProjectDialog(QDialog):
-    def __init__(self, template: bool = False, data: List = []):
+    def __init__(self, template: bool = False, data: Dict = {}):
         super().__init__()
         action: str = "Edit" if data else "Create"
         itemType: str = "project template" if template else "project"
@@ -14,7 +14,7 @@ class ProjectDialog(QDialog):
         self.nameLabel = QLabel(f"Name of {itemType}:")
         self.nameField = QLineEdit()
         if data:
-            self.nameField.setText(data[0])
+            self.nameField.setText(data["name"])
 
         self.nameLayout = QVBoxLayout()
         self.nameLayout.addWidget(self.nameLabel)
@@ -22,7 +22,7 @@ class ProjectDialog(QDialog):
 
         self.phasesLabel = QLabel("Phases:")
         self.phasesField = QListWidget()
-        phases = data[1] if data else ["Planning", "Implementation"]
+        phases = data["phases"] if data else ["Planning", "Implementation"]
         for phase in phases:
             newPhase = QListWidgetItem(phase, self.phasesField)
             newPhase.setFlags(newPhase.flags() | Qt.ItemIsEditable)
