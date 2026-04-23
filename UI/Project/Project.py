@@ -1,11 +1,12 @@
 from PySide6.QtWidgets import QWidget, QScrollArea, QHBoxLayout, QVBoxLayout
+from typing import Dict
 from UI.Project.ProjectHeader import ProjectHeader
 from UI.Project.Phase import Phase
 
 class Project(QWidget):
-    def __init__(self, projectData):
+    def __init__(self, projectData: Dict):
         super().__init__()
-        self.header = ProjectHeader(projectData["name"])
+        self.header = ProjectHeader(projectData)
         self.scrollArea = QScrollArea()
         self.openedProject = QWidget()
         self.openedProjectLayout = QHBoxLayout()
