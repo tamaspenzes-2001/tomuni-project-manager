@@ -6,7 +6,7 @@ class AppUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.sidebar = Sidebar()
-        self.project = Project()
+        self.project = Project({"name": "Todo app", "phases": ["Implementation", "Testing"]})
 
         self.splitter = QSplitter()
         self.splitter.addWidget(self.sidebar)
