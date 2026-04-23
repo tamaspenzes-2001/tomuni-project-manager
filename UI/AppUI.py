@@ -9,7 +9,14 @@ class AppUI(QMainWindow):
         self.project = Project({
             "name": "Todo app",
             "date": "2026-04-23",
-            "phases": ["Implementation", "Testing"]
+            "phases": [{
+                "name": "Plan",
+                "tasks": ["Define objectives", "Document functional requirements"]
+            },
+            {
+                "name": "Implement",
+                "tasks": ["Frontend", "Backend"]
+            }]
         })
 
         self.splitter = QSplitter()

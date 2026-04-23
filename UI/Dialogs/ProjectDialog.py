@@ -22,7 +22,7 @@ class ProjectDialog(QDialog):
 
         self.phasesLabel = QLabel("Phases:")
         self.phasesField = QListWidget()
-        phases = data["phases"] if data else ["Planning", "Implementation"]
+        phases = [phase["name"] for phase in data["phases"]] if data else ["Planning", "Implementation"]
         for phase in phases:
             newPhase = QListWidgetItem(phase, self.phasesField)
             newPhase.setFlags(newPhase.flags() | Qt.ItemIsEditable)
