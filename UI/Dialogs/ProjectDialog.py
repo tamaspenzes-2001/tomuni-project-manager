@@ -77,41 +77,40 @@ class ProjectDialog(QDialog):
         self.phasesField.editItem(self.newPhase)
 
     def editPhase(self):
-        selectedItem = self.phasesField.currentItem()
+        selectedItem: QListWidgetItem = self.phasesField.currentItem()
         if selectedItem:
             self.phasesField.editItem(selectedItem)
 
     def deletePhase(self):
-        itemIndex = self.phasesField.currentRow()
+        itemIndex: int = self.phasesField.currentRow()
         if itemIndex >= 0:
             self.phasesField.takeItem(itemIndex)
 
     def moveUpPhase(self):
-        itemIndex = self.phasesField.currentRow()
+        itemIndex: int = self.phasesField.currentRow()
         if itemIndex >= 0:
-            itemToMove = self.phasesField.takeItem(itemIndex)
+            itemToMove: QListWidgetItem = self.phasesField.takeItem(itemIndex)
             self.phasesField.insertItem(itemIndex-1, itemToMove)
             self.phasesField.setCurrentItem(itemToMove)
 
     def moveDownPhase(self):
-        itemIndex = self.phasesField.currentRow()
-        print(itemIndex)
+        itemIndex: int = self.phasesField.currentRow()
         if itemIndex >= 0:
-            itemToMove = self.phasesField.takeItem(itemIndex)
+            itemToMove: QListWidgetItem = self.phasesField.takeItem(itemIndex)
             self.phasesField.insertItem(itemIndex+1, itemToMove)
             self.phasesField.setCurrentItem(itemToMove)
 
     def okAction(self):
         if self.validate():
-            self.resultName = self.nameField.text()
-            self.resultPhases = [self.phasesField.item(i).text() for i in range(self.phasesField.count())]
+            self.resultName: str = self.nameField.text()
+            self.resultPhases: List[str] = [self.phasesField.item(i).text() for i in range(self.phasesField.count())]
             self.accept()
 
     def cancelAction(self):
         self.reject()
 
     def validate(self):
-        valid = True
+        valid: bool = True
         if not self.nameField.text():
             self.missingName = QLabel("Please provide a name!")
             self.nameLayout.addWidget(self.missingName)
