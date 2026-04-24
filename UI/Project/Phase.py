@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QScrollArea, QVBoxLayout
+from UI.Project.Task import Task
 from typing import Dict
 
 class Phase(QWidget):
@@ -9,6 +10,10 @@ class Phase(QWidget):
         self.tasks = QWidget()
         self.tasksLayout = QVBoxLayout()
         self.tasks.setLayout(self.tasksLayout)
+        for task in phaseData["tasks"]:
+            self.tasksLayout.addWidget(Task(task))
+        self.tasksLayout.addStretch()
+
         self.scrollArea.setWidget(self.tasks)
         self.scrollArea.setWidgetResizable(True)
         self.addTaskButton = QPushButton("Add task")
