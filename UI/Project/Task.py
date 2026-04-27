@@ -21,15 +21,18 @@ class Task(QWidget):
         self.description = QLabel(taskData["description"])
         self.artifactTemplates = TaskArtifactSection(taskData["artifactTemplates"], templates=True)
         self.artifacts = TaskArtifactSection(taskData["artifacts"])
+
+        self.subtasksLayout = QVBoxLayout()
         self.subtasks = [Task(subtask) for subtask in taskData["subtasks"]]
+        for subtask in self.subtasks:
+            self.subtasksLayout.addWidget(subtask)
 
         self.taskLayout = QVBoxLayout()
         self.taskLayout.addWidget(self.header)
         self.taskLayout.addWidget(self.description)
         self.taskLayout.addWidget(self.artifactTemplates)
         self.taskLayout.addWidget(self.artifacts)
-        for subtask in self.subtasks:
-            self.taskLayout.addWidget(subtask)
+        self.taskLayout.addLayout(self.subtasksLayout)
 
         # set initial visibility of widgets
         self.expandCollapse()
