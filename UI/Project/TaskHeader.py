@@ -128,3 +128,4 @@ class TaskHeader(QWidget):
                 })
             subtasksLayout = self.parent().subtasksLayout
             subtasksLayout.addWidget(newTask)
+            self.parent().subtasks.append(newTask)
