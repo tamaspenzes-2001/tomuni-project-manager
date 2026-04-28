@@ -1,8 +1,11 @@
 from PySide6.QtWidgets import QWidget, QToolButton, QVBoxLayout, QLabel, QHBoxLayout
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QTextDocument
 import qtawesome as qta
 from typing import Dict
 from UI.Project.TaskHeader import TaskHeader
 from UI.Project.TaskArtifactSection import TaskArtifactSection
+from UI.Dialogs.TaskDialog import TaskDialog
 
 class Task(QWidget):
     def __init__(self, taskData: Dict):
@@ -19,6 +22,7 @@ class Task(QWidget):
 
         self.header = TaskHeader(taskData)
         self.description = QLabel(taskData["description"])
+        self.description.setTextFormat(Qt.MarkdownText)
         self.artifactTemplates = TaskArtifactSection(taskData["artifactTemplates"], templates=True)
         self.artifacts = TaskArtifactSection(taskData["artifacts"])
 

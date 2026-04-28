@@ -1,7 +1,10 @@
-from PySide6.QtWidgets import QWidget, QCheckBox, QLabel, QToolButton, QMenu, QHBoxLayout, QMessageBox
-from PySide6.QtGui import QAction
+from PySide6.QtWidgets import (QWidget, QCheckBox, QLabel, QToolButton, QMenu,
+                                QHBoxLayout, QMessageBox, QDialog)
+from PySide6.QtGui import QAction, QTextDocument
+from PySide6.QtCore import Qt
 import qtawesome as qta
 from typing import Dict
+from UI.Dialogs.TaskDialog import TaskDialog
 
 class TaskHeader(QWidget):
     def __init__(self, taskData: Dict):
@@ -11,10 +14,10 @@ class TaskHeader(QWidget):
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
 
-        self.state = QCheckBox(taskData["name"])
-        self.state.setTristate()
-        self.state.setCheckState(taskData["state"])
-        self.layout.addWidget(self.state)
+        self.task = QCheckBox(taskData["name"])
+        self.task.setTristate()
+        self.task.setCheckState(taskData["state"])
+        self.layout.addWidget(self.task)
         self.layout.addStretch()
 
         if "startDate" in taskData:
@@ -56,7 +59,15 @@ class TaskHeader(QWidget):
         self.menuButton.setMenu(self.menu)
         
     def edit(self):
-        pass
+        dialog = TaskDialog(self.taskData)
+        result = dialog.exec()
+        if result == QDialog.DialogCode.Accepted:
+            self.taskData["name"] = dialog.resultName
+            self.taskData["description"] = dialog.resultDescription
+            self.task.setText(dialog.resultName)
+            doc = QTextDocument()
+            doc.setMarkdown(dialog.resultDescription)
+            self.parent().description.setText(doc.toHtml())
 
     def delete(self):
         confirmation = QMessageBox.question(self, "Delete task",
@@ -100,4 +111,20 @@ class TaskHeader(QWidget):
             layout.insertWidget(currentIndex + 1, taskWidget)
 
     def addSubtask(self):
-        pass
+        from UI.Project.Task import Task
+
+        dialog = TaskDialog()
+        result = dialog.exec()
+        if result == QDialog.DialogCode.Accepted:
+            doc = QTextDocument()
+            doc.setMarkdown(dialog.resultDescription)
+            newTask = Task({
+                    "name": dialog.resultName,
+                    "description": doc.toHtml(),
+                    "artifactTemplates": [],
+                    "artifacts": [],
+                    "state": Qt.Unchecked,
+                    "subtasks": []
+                })
+            subtasksLayout = self.parent().subtasksLayout
+            subtasksLayout.addWidget(newTask)

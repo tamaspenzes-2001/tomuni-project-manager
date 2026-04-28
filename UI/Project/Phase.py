@@ -1,6 +1,9 @@
-from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QScrollArea, QVBoxLayout
-from UI.Project.Task import Task
+from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QScrollArea, QDialog, QVBoxLayout
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QTextDocument
 from typing import Dict
+from UI.Project.Task import Task
+from UI.Dialogs.TaskDialog import TaskDialog
 
 class Phase(QWidget):
     def __init__(self, phaseData: Dict):
@@ -27,4 +30,17 @@ class Phase(QWidget):
         self.setLayout(self.layout)
 
     def addTask(self):
-        pass
+        dialog = TaskDialog()
+        result = dialog.exec()
+        if result == QDialog.DialogCode.Accepted:
+            doc = QTextDocument()
+            doc.setMarkdown(dialog.resultDescription)
+            newTask = Task({
+                    "name": dialog.resultName,
+                    "description": doc.toHtml(),
+                    "artifactTemplates": [],
+                    "artifacts": [],
+                    "state": Qt.Unchecked,
+                    "subtasks": []
+                })
+            self.tasksLayout.insertWidget(self.tasksLayout.count() - 1, newTask)
