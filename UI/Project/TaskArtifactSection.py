@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QFileDialog, QVBoxLayout, QHBoxLayout
 from superqt import QFlowLayout
 from typing import List
 from UI.Project.Attachment import Attachment
@@ -25,4 +25,7 @@ class TaskArtifactSection(QWidget):
         self.setLayout(self.layout)
 
     def addAttachment(self):
-        pass
+        fileName, _ = QFileDialog.getOpenFileName(self)
+        self.attachmentsLayout.removeWidget(self.addAttachmentButton)
+        self.attachmentsLayout.addWidget(Attachment(fileName))
+        self.attachmentsLayout.addWidget(self.addAttachmentButton)

@@ -17,7 +17,7 @@ class AppUI(QMainWindow):
                     "name": "Define objectives",
                     "description": "What **values** should the software represent?",
                     "artifactTemplates": [],
-                    "artifacts": ["~/Documents/todo-app/objectives.txt"],
+                    "artifacts": ["/home/work/Documents/todo/objectives.txt"],
                     "state": Qt.Checked,
                     "startDate": date(2026, 1, 10),
                     "completionDate": date(2026, 1, 11),
