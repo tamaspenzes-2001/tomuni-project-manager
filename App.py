@@ -5,11 +5,11 @@ from DataManager.DatabaseManager import DatabaseManager
 from UI.AppUI import AppUI
 
 class App(AppUI):
-    def __init__(self, app: QApplication):
-        super().__init__()
-        self.app: QApplication = app
+    def __init__(self):
         self.confManager = ConfigManager()
         self.dbManager = DatabaseManager()
+        super().__init__()
+
         self.settings = QSettings("Tamás Pénzes", "TomUni")
         self.readSettings()
         
@@ -25,4 +25,5 @@ class App(AppUI):
 
     def closeEvent(self, event):
         self.writeSettings()
+        self.dbManager.db.close()
         event.accept()

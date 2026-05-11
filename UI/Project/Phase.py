@@ -8,6 +8,8 @@ from UI.Dialogs.TaskDialog import TaskDialog
 class Phase(QWidget):
     def __init__(self, phaseData: Dict):
         super().__init__()
+        self.phaseId = phaseData.get("id")
+        
         self.name = QLabel(phaseData["name"])
         self.scrollArea = QScrollArea()
         self.tasks = QWidget()
@@ -36,11 +38,11 @@ class Phase(QWidget):
             doc = QTextDocument()
             doc.setMarkdown(dialog.resultDescription)
             newTask = Task({
-                    "name": dialog.resultName,
-                    "description": doc.toHtml(),
-                    "artifactTemplates": [],
-                    "artifacts": [],
-                    "state": Qt.Unchecked,
-                    "subtasks": []
-                })
+                "name": dialog.resultName,
+                "description": doc.toHtml(),
+                "artifactTemplates": [],
+                "artifacts": [],
+                "state": Qt.Unchecked,
+                "subtasks": []
+            })
             self.tasksLayout.insertWidget(self.tasksLayout.count() - 1, newTask)

@@ -2,19 +2,24 @@ from PySide6.QtWidgets import QWidget, QScrollArea, QHBoxLayout, QVBoxLayout
 from typing import Dict
 from UI.Project.ProjectHeader import ProjectHeader
 from UI.Project.Phase import Phase
+from DataManager.DatabaseManager import DatabaseManager
 
 class Project(QWidget):
-    def __init__(self, projectData: Dict):
+    def __init__(self, projectData: Dict, dbManager: DatabaseManager):
         super().__init__()
-        self.header = ProjectHeader(projectData)
+        self.header = ProjectHeader(projectData, dbManager)
         self.scrollArea = QScrollArea()
-        self.openedProject = QWidget()
-        self.openedProjectLayout = QHBoxLayout()
-        self.openedProject.setLayout(self.openedProjectLayout)
-        self.scrollArea.setWidget(self.openedProject)
+        self.phasesContainer = QWidget()
+        self.phasesLayout = QHBoxLayout()
+        self.phasesContainer.setLayout(self.phasesLayout)
+        self.scrollArea.setWidget(self.phasesContainer)
         self.scrollArea.setWidgetResizable(True)
-        for phase in projectData["phases"]:
-            self.openedProjectLayout.addWidget(Phase(phase))
+        self.phases = {}
+
+        for phase_data in projectData["phases"]:
+            phase_widget = Phase(phase_data)
+            self.phases[phase_widget.phaseId] = phase_widget
+            self.phasesLayout.addWidget(phase_widget)
         
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.header)

@@ -22,10 +22,22 @@ class ProjectDialog(QDialog):
 
         self.phasesLabel = QLabel("Phases:")
         self.phasesField = QListWidget()
-        phases = [phase["name"] for phase in data["phases"]] if data else ["Planning", "Implementation"]
-        for phase in phases:
-            newPhase = QListWidgetItem(phase, self.phasesField)
-            newPhase.setFlags(newPhase.flags() | Qt.ItemIsEditable)
+        self.phasesData: List[Dict] = []
+        if data and "phases" in data:
+            for phase in data["phases"]:
+                phase_entry = {
+                    "id": phase.get("id"),
+                    "name": phase["name"]
+                }
+                self.phasesData.append(phase_entry)
+                newPhase = QListWidgetItem(phase["name"], self.phasesField)
+                newPhase.setFlags(newPhase.flags() | Qt.ItemIsEditable)
+        else:
+            default_phases = ["Planning", "Implementation"]
+            for phase in default_phases:
+                self.phasesData.append({"id": None, "name": phase})
+                newPhase = QListWidgetItem(phase, self.phasesField)
+                newPhase.setFlags(newPhase.flags() | Qt.ItemIsEditable)
 
         self.phaseAddButton = QPushButton("Add")
         self.phaseAddButton.clicked.connect(self.addPhase)
@@ -75,6 +87,7 @@ class ProjectDialog(QDialog):
         self.newPhase = QListWidgetItem(self.phasesField)
         self.newPhase.setFlags(self.newPhase.flags() | Qt.ItemIsEditable)
         self.phasesField.editItem(self.newPhase)
+        self.phasesData.append({"id": None, "name": self.newPhase.text()})
 
     def editPhase(self):
         selectedItem: QListWidgetItem = self.phasesField.currentItem()
@@ -85,6 +98,7 @@ class ProjectDialog(QDialog):
         itemIndex: int = self.phasesField.currentRow()
         if itemIndex >= 0:
             self.phasesField.takeItem(itemIndex)
+            self.phasesData.pop(itemIndex)
 
     def moveUpPhase(self):
         itemIndex: int = self.phasesField.currentRow()
@@ -92,6 +106,8 @@ class ProjectDialog(QDialog):
             itemToMove: QListWidgetItem = self.phasesField.takeItem(itemIndex)
             self.phasesField.insertItem(itemIndex-1, itemToMove)
             self.phasesField.setCurrentItem(itemToMove)
+            dataToMove: Dict = self.phasesData.pop(itemIndex)
+            self.phasesData.insert(itemIndex-1, dataToMove)
 
     def moveDownPhase(self):
         itemIndex: int = self.phasesField.currentRow()
@@ -99,11 +115,15 @@ class ProjectDialog(QDialog):
             itemToMove: QListWidgetItem = self.phasesField.takeItem(itemIndex)
             self.phasesField.insertItem(itemIndex+1, itemToMove)
             self.phasesField.setCurrentItem(itemToMove)
+            dataToMove: Dict = self.phasesData.pop(itemIndex)
+            self.phasesData.insert(itemIndex+1, dataToMove)
 
     def okAction(self):
         if self.validate():
             self.resultName: str = self.nameField.text()
-            self.resultPhases: List[str] = [self.phasesField.item(i).text() for i in range(self.phasesField.count())]
+            for i in range(self.phasesField.count()):
+                self.phasesData[i]["name"] = self.phasesField.item(i).text()
+            self.resultPhases: List[Dict] = self.phasesData
             self.accept()
 
     def cancelAction(self):
