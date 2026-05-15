@@ -8,13 +8,12 @@ class DatabaseManager:
         self.db = QSqlDatabase.addDatabase("QSQLITE")
         self.db.setDatabaseName(self.dbPath)
         self.db.open()
+        self.executeQuery("PRAGMA foreign_keys = ON")
 
         if not self.db.tables():
             self._createTables_()
 
     def _createTables_(self):
-        self.executeQuery("PRAGMA foreign_keys = ON")
-
         tableData: List[Dict] = [{
             "name": "Project",
             "fields":
@@ -46,6 +45,7 @@ class DatabaseManager:
                 description VARCHAR,
                 phaseId INT,
                 parentTaskId INT,
+                position INT NOT NULL DEFAULT 0,
                 state VARCHAR NOT NULL DEFAULT 'NotStarted',
                 startDate VARCHAR,
                 completionDate VARCHAR,
@@ -73,7 +73,7 @@ class DatabaseManager:
             foreignKeys: str = ""
             if "foreignKeys" in table:
                 for fk in table["foreignKeys"]:
-                    foreignKeys += f"FOREIGN KEY({fk[0]}) REFERENCES {fk[1]}(id),\n"
+                    foreignKeys += f"FOREIGN KEY({fk[0]}) REFERENCES {fk[1]}(id) ON DELETE CASCADE,\n"
             sql: str = f"""
             CREATE TABLE IF NOT EXISTS {table["name"]} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
@@ -90,7 +90,7 @@ class DatabaseManager:
             query = QSqlQuery(self.db)
         query.prepare(queryString)
         for param in parameters:
-            query.addBindValue(str(param))
+            query.addBindValue(param)
         if not query.exec():
             print(f"Failed to execute query: {queryString}")
             print(f"Error: {query.lastError().text()}")

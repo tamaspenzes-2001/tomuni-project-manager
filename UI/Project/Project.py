@@ -14,11 +14,11 @@ class Project(QWidget):
         self.phasesContainer.setLayout(self.phasesLayout)
         self.scrollArea.setWidget(self.phasesContainer)
         self.scrollArea.setWidgetResizable(True)
-        self.phases = {}
+        self.phases: Dict = {}
 
         for phase_data in projectData["phases"]:
-            phase_widget = Phase(phase_data)
-            self.phases[phase_widget.phaseId] = phase_widget
+            phase_widget = Phase(phase_data, dbManager)
+            self.phases[phase_data["id"]] = phase_widget
             self.phasesLayout.addWidget(phase_widget)
         
         self.layout = QVBoxLayout()

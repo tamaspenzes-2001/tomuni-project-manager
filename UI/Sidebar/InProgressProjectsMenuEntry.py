@@ -1,14 +1,15 @@
-from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QMainWindow
-from PySide6.QtCore import QDate
+from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QMainWindow
+from PySide6.QtCore import Qt, QDate
 import qtawesome as qta
+from typing import Dict, List
 from UI.Sidebar.FinishedProjectsMenuEntry import FinishedProjectsMenuEntry
 from DataManager.DatabaseManager import DatabaseManager
 
 class InProgressProjectsMenuEntry(QWidget):
     def __init__(self, name: str, id: int, dbManager: DatabaseManager):
         super().__init__()
-        self.dbManager = dbManager
-        self.id = id
+        self.dbManager: DatabaseManager = dbManager
+        self.id: int = id
 
         self.name = QLabel(name)
         self.completeButton = QPushButton()
@@ -35,10 +36,10 @@ class InProgressProjectsMenuEntry(QWidget):
         if not success or not projectQuery.next():
             return
 
-        projectData = {
+        projectData: Dict = {
             "name": projectQuery.value("name"),
             "startDate": projectQuery.value("startDate"),
-            "finishDate":projectQuery.value("finishDate"),
+            "finishDate": projectQuery.value("finishDate"),
             "state": projectQuery.value("state"),
             "template": projectQuery.value("template"),
             "id": self.id,
@@ -50,112 +51,109 @@ class InProgressProjectsMenuEntry(QWidget):
             SELECT ph.id, ph.name
             FROM Phase ph
             WHERE ph.projectId = ?
-            ORDER BY ph.position
+            ORDER BY ph.position ASC
             """,
             [self.id]
         )
 
         while phasesQuery.next():
-            phaseData = {
-                "id": phasesQuery.value("id"),
-                "name": phasesQuery.value("name"),
-                "tasks": []
-            }
+            phaseId: int = phasesQuery.value("id")
+            phaseName: str = phasesQuery.value("name")
 
             tasksQuery, _ = self.dbManager.executeQuery(
                 """
-                SELECT t.id, t.name, t.description, t.state, t.startDate, t.completionDate, t.parentTaskId
+                SELECT t.id, t.name, t.description, t.state, t.startDate, t.completionDate, t.parentTaskId, t.position
                 FROM Task t
-                WHERE t.phaseId = ? AND t.parentTaskId IS NULL
-                ORDER BY t.id
+                WHERE t.phaseId = ?
+                ORDER BY t.position ASC
                 """,
-                [phasesQuery.value("id")]
+                [phaseId]
             )
 
+            allTasks: List = []
+            tasksById: Dict = {}
+
             while tasksQuery.next():
-                taskData = {
+                taskData: Dict = {
+                    "id": tasksQuery.value("id"),
                     "name": tasksQuery.value("name"),
                     "description": tasksQuery.value("description") or "",
-                    "state": tasksQuery.value("state"),
+                    "state": self._convertState(tasksQuery.value("state")),
                     "startDate": tasksQuery.value("startDate"),
                     "completionDate": tasksQuery.value("completionDate"),
+                    "parentTaskId": tasksQuery.value("parentTaskId"),
+                    "position": tasksQuery.value("position"), # Keep position for safety
                     "artifactTemplates": [],
                     "artifacts": [],
                     "subtasks": []
                 }
+                
+                tasksById[taskData["id"]] = taskData
+                allTasks.append(taskData)
 
-                artifactQuery, _ = self.dbManager.executeQuery(
-                    """
-                    SELECT filePath, template
-                    FROM Artifact
-                    WHERE taskId = ?
-                    """,
-                    [tasksQuery.value("id")]
-                )
+            rootTasks: List = []
 
-                while artifactQuery.next():
-                    if artifactQuery.value("template"):
-                        taskData["artifactTemplates"].append(artifactQuery.value("filePath"))
-                    else:
-                        taskData["artifacts"].append(artifactQuery.value("filePath"))
+            for task in allTasks:
+                parentId = task["parentTaskId"]
+                
+                if parentId is None or parentId == "" or parentId == 0:
+                    rootTasks.append(task)
+                else:
+                    if parentId in tasksById:
+                        tasksById[parentId]["subtasks"].append(task)
 
-                subtasksQuery, _ = self.dbManager.executeQuery(
-                    """
-                    SELECT t.id, t.name, t.description, t.state, t.startDate, t.completionDate
-                    FROM Task t
-                    WHERE t.parentTaskId = ?
-                    ORDER BY t.id
-                    """,
-                    [tasksQuery.value("id")]
-                )
+            self._fetchArtifactsForTasks(tasksById)
 
-                while subtasksQuery.next():
-                    subtaskData = {
-                        "name": subtasksQuery.value("name"),
-                        "description": subtasksQuery.value("description") or "",
-                        "state": subtasksQuery.value("state"),
-                        "startDate": subtasksQuery.value("startDate"),
-                        "completionDate": subtasksQuery.value("completionDate"),
-                        "artifactTemplates": [],
-                        "artifacts": [],
-                        "subtasks": []
-                    }
-
-                    subtaskArtifactQuery, _ = self.dbManager.executeQuery(
-                        """
-                        SELECT filePath, template
-                        FROM Artifact
-                        WHERE taskId = ?
-                        """,
-                        [subtasksQuery.value("id")]
-                    )
-
-                    while subtaskArtifactQuery.next():
-                        if subtaskArtifactQuery.value("template"):
-                            subtaskData["artifactTemplates"].append(subtaskArtifactQuery.value("filePath"))
-                        else:
-                            subtaskData["artifacts"].append(subtaskArtifactQuery.value("filePath"))
-
-                    taskData["subtasks"].append(subtaskData)
-
-                phaseData["tasks"].append(taskData)
-
+            phaseData: Dict = {
+                "id": phaseId,
+                "name": phaseName,
+                "tasks": rootTasks
+            }
             projectData["phases"].append(phaseData)
 
-        try:
-            mainWindow = self
-            while mainWindow and not isinstance(mainWindow, QMainWindow):
-                mainWindow = mainWindow.parent()
+        mainWindow = self
+        while mainWindow and not isinstance(mainWindow, QMainWindow):
+            mainWindow = mainWindow.parent()
+        if mainWindow and hasattr(mainWindow, 'loadProject'):
+            mainWindow.loadProject(projectData)
 
-            if mainWindow and hasattr(mainWindow, 'loadProject'):
-                mainWindow._currentProjectMenuEntry = self
-                mainWindow.loadProject(projectData)
-        except Exception as e:
-            print(f"Error opening project: {e}")
+    def _convertState(self, stateStr):
+        match stateStr:
+            case "NotStarted": return Qt.Unchecked
+            case "InProgress": return Qt.PartiallyChecked
+            case "Completed": return Qt.Checked
+        return Qt.Unchecked
+
+    def _fetchArtifactsForTasks(self, tasksById):
+        taskIds = list(tasksById.keys())
+        if not taskIds:
+            return
+
+        placeholders: str = ",".join(["?"] * len(taskIds))
+        queryStr: str = f"""
+        SELECT taskId, filePath, template 
+        FROM Artifact 
+        WHERE taskId IN ({placeholders})
+        """
+
+        query, success = self.dbManager.executeQuery(queryStr, taskIds)
+        if not success:
+            return
+
+        while query.next():
+            taskId: int = query.value("taskId")
+            if taskId in tasksById:
+                if query.value("template"):
+                    section: str = "artifactTemplates"
+                else:
+                    section: str = "artifacts"
+                tasksById[taskId][section].append(query.value("filePath"))
 
     def completeProject(self):
-        projectsSection = self.parent().parent().parent().parent().parent().parent().parent()
-        finishedProjectsMenuLayout = projectsSection.finishedProjectsTab.menuLayout
+        from UI.Sidebar.ProjectsSection import ProjectsSection
+
+        projectsSection: ProjectsSection = self.parent().parent().parent().parent().parent().parent().parent()
+        finishedProjectsMenuLayout: QVBoxLayout = projectsSection.finishedProjectsTab.menuLayout
         finishedProject = FinishedProjectsMenuEntry(self.name.text(), self.id, self.dbManager)
         finishedProjectsMenuLayout.insertWidget(0, finishedProject)
         self.deleteLater()

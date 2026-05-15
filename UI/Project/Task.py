@@ -2,13 +2,14 @@ from PySide6.QtWidgets import QWidget, QToolButton, QVBoxLayout, QLabel, QHBoxLa
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QTextDocument
 import qtawesome as qta
-from typing import Dict
+from typing import Dict, List
 from UI.Project.TaskHeader import TaskHeader
 from UI.Project.TaskArtifactSection import TaskArtifactSection
 from UI.Dialogs.TaskDialog import TaskDialog
+from DataManager.DatabaseManager import DatabaseManager
 
 class Task(QWidget):
-    def __init__(self, taskData: Dict):
+    def __init__(self, taskData: Dict, dbManager: DatabaseManager):
         super().__init__()
         self.taskData: Dict = taskData
         self.expanded: bool = True
@@ -20,14 +21,16 @@ class Task(QWidget):
         self.expandCollapseLayout.addWidget(self.expandCollapseButton)
         self.expandCollapseLayout.addStretch()
 
-        self.header = TaskHeader(taskData)
+        self.header = TaskHeader(taskData, dbManager)
         self.description = QLabel(taskData["description"])
         self.description.setTextFormat(Qt.MarkdownText)
-        self.artifactTemplates = TaskArtifactSection(taskData["artifactTemplates"], templates=True)
-        self.artifacts = TaskArtifactSection(taskData["artifacts"])
+        self.artifactTemplates = TaskArtifactSection(
+            taskData["id"], taskData["artifactTemplates"], dbManager, templates=True
+        )
+        self.artifacts = TaskArtifactSection(taskData["id"], taskData["artifacts"], dbManager)
 
         self.subtasksLayout = QVBoxLayout()
-        self.subtasks = [Task(subtask) for subtask in taskData["subtasks"]]
+        self.subtasks: List[Task] = [Task(subtask, dbManager) for subtask in taskData["subtasks"]]
         for subtask in self.subtasks:
             self.subtasksLayout.addWidget(subtask)
 
@@ -53,5 +56,5 @@ class Task(QWidget):
         self.artifacts.setVisible(self.expanded)
         for subtask in self.subtasks:
             subtask.setVisible(self.expanded)
-        icon = "fa5s.chevron-down" if self.expanded else "fa5s.chevron-right"
+        icon: str = "fa5s.chevron-down" if self.expanded else "fa5s.chevron-right"
         self.expandCollapseButton.setIcon(qta.icon(icon))

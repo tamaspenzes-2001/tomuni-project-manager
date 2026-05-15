@@ -3,17 +3,21 @@ from PySide6.QtGui import QDesktopServices, QIcon, QPixmap
 from PySide6.QtCore import Qt, QPoint
 import qtawesome as qta
 from pathlib import Path
+from DataManager.DatabaseManager import DatabaseManager
 
 class Attachment(QWidget):
-    def __init__(self, filePath: str):
+    def __init__(self, filePath: str, artifactId: int, dbManager: DatabaseManager, isTemplate: bool = False):
         super().__init__()
-        self.filePath = filePath
+        self.filePath: str = filePath
+        self.artifactId: int = artifactId
+        self.dbManager: DatabaseManager = dbManager
+        self.isTemplate: bool = isTemplate
 
         self.iconLabel = QLabel()
         self.iconLabel.setPixmap(qta.icon("mdi.paperclip").pixmap(24, 24))
         self.fileName = QLabel(filePath.split("/")[-1])
         self.deleteButton = QPushButton("x")
-        self.deleteButton.clicked.connect(self.deleteLater)
+        self.deleteButton.clicked.connect(self.deleteAttachment)
 
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.iconLabel)
@@ -37,3 +41,18 @@ class Attachment(QWidget):
         url: str = path.as_uri()
         if not QDesktopServices.openUrl(url):
             QMessageBox.critical(self, "Error", "Could not open the file.")
+
+    def deleteAttachment(self):
+        if self.artifactId is None:
+            QMessageBox.warning(self, "Error", "Cannot delete: Missing artifact ID.")
+            return
+
+        _, success = self.dbManager.executeQuery(
+            "DELETE FROM Artifact WHERE id = ?",
+            [self.artifactId]
+        )
+        
+        if success:
+            self.deleteLater()
+        else:
+            QMessageBox.warning(self, "Error", "Failed to delete attachment from database.")

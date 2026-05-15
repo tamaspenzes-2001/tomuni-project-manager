@@ -1,15 +1,17 @@
 from PySide6.QtWidgets import (QWidget, QCheckBox, QLabel, QToolButton, QMenu,
-                                QHBoxLayout, QMessageBox, QDialog)
+                                QHBoxLayout, QVBoxLayout, QMessageBox, QDialog)
 from PySide6.QtGui import QAction, QTextDocument
 from PySide6.QtCore import Qt
 import qtawesome as qta
 from typing import Dict
 from UI.Dialogs.TaskDialog import TaskDialog
+from DataManager.DatabaseManager import DatabaseManager
 
 class TaskHeader(QWidget):
-    def __init__(self, taskData: Dict):
+    def __init__(self, taskData: Dict, dbManager: DatabaseManager):
         super().__init__()
-        self.taskData = taskData
+        self.taskData: Dict = taskData
+        self.dbManager: DatabaseManager = dbManager
 
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
@@ -17,11 +19,12 @@ class TaskHeader(QWidget):
         self.task = QCheckBox(taskData["name"])
         self.task.setTristate()
         self.task.setCheckState(taskData["state"])
+        self.task.checkStateChanged.connect(self.changeState)
         self.layout.addWidget(self.task)
         self.layout.addStretch()
 
-        if "startDate" in taskData:
-            if "completionDate" in taskData:
+        if "startDate" in taskData and taskData["startDate"]:
+            if "completionDate" in taskData and taskData["completionDate"]:
                 self.date = QLabel(f"{taskData['startDate']} - {taskData['completionDate']}")
             else:
                 self.date = QLabel(f"Started at: {taskData['startDate']}")
@@ -57,75 +60,223 @@ class TaskHeader(QWidget):
             self.moveDownAction, self.addSubtaskAction
         ])
         self.menuButton.setMenu(self.menu)
+
+    def changeState(self, state):
+        stateMap: Dict = {
+            Qt.Unchecked: "NotStarted",
+            Qt.PartiallyChecked: "InProgress",
+            Qt.Checked: "Completed"
+        }
+
+        newState: str = stateMap.get(state, "NotStarted")
+
+        self.dbManager.executeQuery(
+            "UPDATE Task SET state = ? WHERE id = ?",
+            [newState, self.taskData["id"]]
+        )
+
+        self.taskData["state"] = state
         
     def edit(self):
         dialog = TaskDialog(self.taskData)
-        result = dialog.exec()
+        result: int = dialog.exec()
         if result == QDialog.DialogCode.Accepted:
-            self.taskData["name"] = dialog.resultName
-            self.taskData["description"] = dialog.resultDescription
-            self.task.setText(dialog.resultName)
+            name: str = dialog.resultName
+            description: str = dialog.resultDescription
+            self.taskData["name"]: str = name
+            self.taskData["description"]: str = description
+            self.task.setText(name)
             doc = QTextDocument()
-            doc.setMarkdown(dialog.resultDescription)
+            doc.setMarkdown(description)
             self.parent().description.setText(doc.toHtml())
 
+            self.dbManager.executeQuery(
+                "UPDATE Task SET name = ?, description = ? WHERE id = ?",
+                [name, description, self.taskData["id"]]
+            )
+
     def delete(self):
+        from UI.Project.Task import Task
+        from UI.Project.Phase import Phase
+
         confirmation = QMessageBox.question(self, "Delete task",
                                     f"Delete task {self.taskData['name']}? It will be permanently lost!",
                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if confirmation == QMessageBox.Yes:
-            self.parent().deleteLater()
+            taskWidget: Task = self.parent()
+
+            if hasattr(taskWidget.parent(), "subtasks"):
+                parentTask: Task = taskWidget.parent()
+                parentTask.subtasks.remove(taskWidget)
+                parentTask.subtasksLayout.removeWidget(taskWidget)
+                taskWidget.deleteLater()
+            else:
+                phaseWidget: Phase = taskWidget.parent().parent().parent().parent()
+                if hasattr(phaseWidget, "phaseData") and "tasks" in phaseWidget.phaseData:
+                    phaseWidget.phaseData["tasks"].remove(taskWidget.taskData)
+
+                for i in range(phaseWidget.tasksLayout.count()):
+                    if phaseWidget.tasksLayout.itemAt(i).widget() == taskWidget:
+                        phaseWidget.tasksLayout.removeWidget(taskWidget)
+                        taskWidget.deleteLater()
+                        break
+                    
+            self.dbManager.executeQuery("DELETE FROM Task WHERE id = ?", [self.taskData["id"]])
 
     def moveUp(self):
-        taskWidget = self.parent()
-        layout = None
-        # get layout based on whether the task is a subtask
+        from UI.Project.Task import Task
+
+        taskWidget: Task = self.parent()
+        layout: QVBoxLayout = None
+
         if hasattr(taskWidget.parent(), "subtasksLayout"):
             layout = taskWidget.parent().subtasksLayout
         else:
             layout = taskWidget.parent().parent().parent().parent().tasksLayout
-        currentIndex = -1
+
+        currentIndex: int = -1
         for i in range(layout.count()):
             if layout.itemAt(i).widget() == taskWidget:
                 currentIndex = i
                 break
+            
         if currentIndex > 0:
+            prevWidget: Task = layout.itemAt(currentIndex - 1).widget()
+
             layout.removeWidget(taskWidget)
             layout.insertWidget(currentIndex - 1, taskWidget)
 
+            query, _ = self.dbManager.executeQuery(
+                "SELECT position FROM Task WHERE id = ?",
+                [self.taskData["id"]]
+            )
+            query.next()
+            oldPosition: int = query.value("position")
+
+            query, _ = self.dbManager.executeQuery(
+                "SELECT position FROM Task WHERE id = ?",
+                [prevWidget.taskData["id"]]
+            )
+            query.next()
+            swapPosition: int = query.value("position")
+
+            operations: List[Set[str, List[int]]] = [
+                ["UPDATE Task SET position = ? WHERE id = ?", [swapPosition, self.taskData["id"]]],
+                ["UPDATE Task SET position = ? WHERE id = ?", [oldPosition, prevWidget.taskData["id"]]]
+            ]
+
+            self.dbManager.executeTransaction(operations)
+
     def moveDown(self):
-        taskWidget = self.parent()
-        layout = None
-        # get layout based on whether the task is a subtask
+        from UI.Project.Task import Task
+
+        taskWidget: Task = self.parent()
+        layout: QVBoxLayout = None
+
         if hasattr(taskWidget.parent(), "subtasksLayout"):
             layout = taskWidget.parent().subtasksLayout
         else:
             layout = taskWidget.parent().parent().parent().parent().tasksLayout
-        currentIndex = -1
+
+        currentIndex: int = -1
         for i in range(layout.count()):
             if layout.itemAt(i).widget() == taskWidget:
                 currentIndex = i
                 break
-        if currentIndex < layout.count()-1:
+            
+        if currentIndex < layout.count() - 1:
+            nextWidget: Task = layout.itemAt(currentIndex + 1).widget()
+
             layout.removeWidget(taskWidget)
             layout.insertWidget(currentIndex + 1, taskWidget)
+
+            query, _ = self.dbManager.executeQuery(
+                "SELECT position FROM Task WHERE id = ?",
+                [self.taskData["id"]]
+            )
+            query.next()
+            oldPosition: int = query.value("position")
+
+            query, _ = self.dbManager.executeQuery(
+                "SELECT position FROM Task WHERE id = ?",
+                [nextWidget.taskData["id"]]
+            )
+            query.next()
+            swapPosition: int = query.value("position")
+
+            operations: List[Set[str, List[int]]] = [
+                ["UPDATE Task SET position = ? WHERE id = ?", [swapPosition, self.taskData["id"]]],
+                ["UPDATE Task SET position = ? WHERE id = ?", [oldPosition, nextWidget.taskData["id"]]]
+            ]
+
+            self.dbManager.executeTransaction(operations)
 
     def addSubtask(self):
         from UI.Project.Task import Task
 
         dialog = TaskDialog()
-        result = dialog.exec()
+        result: int = dialog.exec()
+        name: str = dialog.resultName
+        description: str = dialog.resultDescription
         if result == QDialog.DialogCode.Accepted:
             doc = QTextDocument()
-            doc.setMarkdown(dialog.resultDescription)
-            newTask = Task({
-                    "name": dialog.resultName,
+            doc.setMarkdown(description)
+
+            query, success = self.dbManager.executeQuery(
+                "SELECT phaseId FROM Task WHERE id = ?",
+                [self.taskData["id"]]
+            )
+            
+            if not success or not query.next():
+                print("ERROR: Could not find parent task to determine phaseId")
+                return
+
+            phaseId: int = query.value("phaseId")
+            if phaseId is None:
+                print("ERROR: Parent task has no phaseId")
+                return
+
+            _, success = self.dbManager.executeQuery(
+                """
+                INSERT INTO Task (name, description, phaseId, parentTaskId)
+                VALUES (?, ?, ?, ?)
+                """,
+                [name, description, phaseId, self.taskData["id"]]
+            )
+            
+            if not success:
+                print("ERROR: Failed to insert subtask")
+                return
+
+            if success:
+                query, _ = self.dbManager.executeQuery("SELECT MAX(id) AS max_id FROM Task")
+                query.next()
+                maxId: int = query.value("max_id")
+                
+                newSubtaskData: Dict = {
+                    "id": maxId,
+                    "name": name,
                     "description": doc.toHtml(),
                     "artifactTemplates": [],
                     "artifacts": [],
                     "state": Qt.Unchecked,
                     "subtasks": []
-                })
-            subtasksLayout = self.parent().subtasksLayout
-            subtasksLayout.addWidget(newTask)
-            self.parent().subtasks.append(newTask)
+                }
+    
+                newSubtask = Task(newSubtaskData, self.dbManager)
+                self.parent().subtasksLayout.addWidget(newSubtask)
+                newSubtask.setVisible(self.parent().expanded)
+                self.parent().subtasks.append(newSubtask)
+
+                query, _ = self.dbManager.executeQuery(
+                    "SELECT MAX(position) FROM Task WHERE parentTaskId = ?",
+                    [self.taskData["id"]]
+                )
+                query.next()
+                maxPosition: int = query.value(0)
+                newPosition: int = (maxPosition + 1) if maxPosition is not None else 0
+
+                self.dbManager.executeQuery(
+                    "UPDATE Task SET position = ? WHERE id = ?",
+                    [newPosition, maxId]
+                )
