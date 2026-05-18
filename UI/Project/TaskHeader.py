@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QCheckBox, QLabel, QToolButton, QMenu,
                                 QHBoxLayout, QVBoxLayout, QMessageBox, QDialog)
 from PySide6.QtGui import QAction, QTextDocument
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QDate
 import qtawesome as qta
 from typing import Dict
 from UI.Dialogs.TaskDialog import TaskDialog
@@ -19,16 +19,29 @@ class TaskHeader(QWidget):
         self.task = QCheckBox(taskData["name"])
         self.task.setTristate()
         self.task.setCheckState(taskData["state"])
+
+        _original_mouse_press = self.task.mousePressEvent
+
+        def _custom_mouse_press(event):
+            if self.task.checkState() == Qt.Checked:
+                return
+            _original_mouse_press(event)
+
+        self.task.mousePressEvent = _custom_mouse_press
+
         self.task.checkStateChanged.connect(self.changeState)
         self.layout.addWidget(self.task)
         self.layout.addStretch()
 
-        if "startDate" in taskData and taskData["startDate"]:
-            if "completionDate" in taskData and taskData["completionDate"]:
-                self.date = QLabel(f"{taskData['startDate']} - {taskData['completionDate']}")
-            else:
-                self.date = QLabel(f"Started at: {taskData['startDate']}")
-            self.layout.addWidget(self.date)
+        self.date = QLabel("")
+        self.layout.addWidget(self.date)
+
+        print(f"DEBUG: Initial state = {taskData['state']}")
+        print(f"DEBUG: Has startDate = {'startDate' in taskData}")
+        print(f"DEBUG: Has completionDate = {'completionDate' in taskData}")
+
+        # Initialize date label based on initial state
+        self._updateDateLabel()
 
         self.menuButton = QToolButton()
         self.menuButton.setAutoRaise(True)
@@ -61,6 +74,38 @@ class TaskHeader(QWidget):
         ])
         self.menuButton.setMenu(self.menu)
 
+    def _updateDateLabel(self):
+        state = self.task.checkState()
+        print(f"DEBUG: State = {state} (Type: {type(state)})")
+        has_start_date = "startDate" in self.taskData and self.taskData["startDate"]
+        has_completion_date = "completionDate" in self.taskData and self.taskData["completionDate"]
+
+        start_val = self.taskData.get("startDate")
+        print(f"DEBUG: Has startDate key? {has_start_date}, Value: '{start_val}'")
+        
+        if state == Qt.Unchecked:
+            self.date.setVisible(False)
+        elif state == Qt.PartiallyChecked:
+            if has_start_date:
+                self.date.setText(f"Started at: {self.taskData['startDate']}")
+                self.date.setVisible(True)
+            else:
+                self.date.setVisible(False)
+        elif state == Qt.Checked:
+            if has_start_date:
+                if has_completion_date:
+                    self.date.setText(f"{self.taskData['startDate']} - {self.taskData['completionDate']}")
+                else:
+                    self.date.setText(f"Started at: {self.taskData['startDate']}")
+                self.date.setVisible(True)
+            else:
+                self.date.setVisible(False)
+        
+        self.layout.update()
+
+        print(f"DEBUG: Label text = '{self.date.text()}'")
+        print(f"DEBUG: Label visible = {self.date.isVisible()}")
+
     def changeState(self, state):
         stateMap: Dict = {
             Qt.Unchecked: "NotStarted",
@@ -68,14 +113,24 @@ class TaskHeader(QWidget):
             Qt.Checked: "Completed"
         }
 
+        match state:
+            case Qt.PartiallyChecked:
+                self.taskData["startDate"] = QDate.currentDate().toString("yyyy-MM-dd")
+            case Qt.Checked:
+                self.taskData["completionDate"] = QDate.currentDate().toString("yyyy-MM-dd")
+
         newState: str = stateMap.get(state, "NotStarted")
 
+        completionDate = self.taskData["completionDate"] if "completionDate" in self.taskData else None
+
         self.dbManager.executeQuery(
-            "UPDATE Task SET state = ? WHERE id = ?",
-            [newState, self.taskData["id"]]
+            "UPDATE Task SET state = ?, startDate = ?, completionDate = ? WHERE id = ?",
+            [newState, self.taskData["startDate"], completionDate, self.taskData["id"]]
         )
 
         self.taskData["state"] = state
+
+        self._updateDateLabel()
         
     def edit(self):
         dialog = TaskDialog(self.taskData)
