@@ -20,14 +20,14 @@ class TaskHeader(QWidget):
         self.task.setTristate()
         self.task.setCheckState(taskData["state"])
 
-        _original_mouse_press = self.task.mousePressEvent
+        _originalMousePress = self.task.mousePressEvent
 
-        def _custom_mouse_press(event):
+        def _customMousePress(event):
             if self.task.checkState() == Qt.Checked:
                 return
-            _original_mouse_press(event)
+            _originalMousePress(event)
 
-        self.task.mousePressEvent = _custom_mouse_press
+        self.task.mousePressEvent = _customMousePress
 
         self.task.checkStateChanged.connect(self.changeState)
         self.layout.addWidget(self.task)
@@ -35,10 +35,6 @@ class TaskHeader(QWidget):
 
         self.date = QLabel("")
         self.layout.addWidget(self.date)
-
-        print(f"DEBUG: Initial state = {taskData['state']}")
-        print(f"DEBUG: Has startDate = {'startDate' in taskData}")
-        print(f"DEBUG: Has completionDate = {'completionDate' in taskData}")
 
         # Initialize date label based on initial state
         self._updateDateLabel()
@@ -76,24 +72,20 @@ class TaskHeader(QWidget):
 
     def _updateDateLabel(self):
         state = self.task.checkState()
-        print(f"DEBUG: State = {state} (Type: {type(state)})")
-        has_start_date = "startDate" in self.taskData and self.taskData["startDate"]
-        has_completion_date = "completionDate" in self.taskData and self.taskData["completionDate"]
-
-        start_val = self.taskData.get("startDate")
-        print(f"DEBUG: Has startDate key? {has_start_date}, Value: '{start_val}'")
+        hasStartDate = "startDate" in self.taskData and self.taskData["startDate"]
+        hasCompletionDate = "completionDate" in self.taskData and self.taskData["completionDate"]
         
         if state == Qt.Unchecked:
             self.date.setVisible(False)
         elif state == Qt.PartiallyChecked:
-            if has_start_date:
+            if hasStartDate:
                 self.date.setText(f"Started at: {self.taskData['startDate']}")
                 self.date.setVisible(True)
             else:
                 self.date.setVisible(False)
         elif state == Qt.Checked:
-            if has_start_date:
-                if has_completion_date:
+            if hasStartDate:
+                if hasCompletionDate:
                     self.date.setText(f"{self.taskData['startDate']} - {self.taskData['completionDate']}")
                 else:
                     self.date.setText(f"Started at: {self.taskData['startDate']}")
@@ -102,9 +94,6 @@ class TaskHeader(QWidget):
                 self.date.setVisible(False)
         
         self.layout.update()
-
-        print(f"DEBUG: Label text = '{self.date.text()}'")
-        print(f"DEBUG: Label visible = {self.date.isVisible()}")
 
     def changeState(self, state):
         stateMap: Dict = {
