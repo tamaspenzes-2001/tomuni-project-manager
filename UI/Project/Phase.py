@@ -36,9 +36,9 @@ class Phase(QWidget):
     def addTask(self):
         dialog = TaskDialog()
         result: int = dialog.exec()
-        name: str = dialog.resultName
-        description: str = dialog.resultDescription
         if result == QDialog.DialogCode.Accepted:
+            name: str = dialog.resultName
+            description: str = dialog.resultDescription
             doc = QTextDocument()
             doc.setMarkdown(description)
 
