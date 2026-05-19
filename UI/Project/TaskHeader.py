@@ -6,12 +6,14 @@ import qtawesome as qta
 from typing import Dict
 from UI.Dialogs.TaskDialog import TaskDialog
 from DataManager.DatabaseManager import DatabaseManager
+from DataManager.ConfigManager import ConfigManager
 
 class TaskHeader(QWidget):
-    def __init__(self, taskData: Dict, dbManager: DatabaseManager):
+    def __init__(self, taskData: Dict, dbManager: DatabaseManager, confManager: ConfigManager):
         super().__init__()
         self.taskData: Dict = taskData
         self.dbManager: DatabaseManager = dbManager
+        self.confManager: ConfigManager = confManager
 
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
@@ -143,10 +145,14 @@ class TaskHeader(QWidget):
         from UI.Project.Task import Task
         from UI.Project.Phase import Phase
 
-        confirmation = QMessageBox.question(self, "Delete task",
-                                    f"Delete task {self.taskData['name']}? It will be permanently lost!",
-                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        if confirmation == QMessageBox.Yes:
+        if self.confManager.config["delConfirmTasks"]:
+            confirmation = QMessageBox.question(self, "Delete task",
+                                        f"Delete task {self.taskData['name']}? It will be permanently lost!",
+                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            confirmed = confirmation == QMessageBox.Yes
+        else:
+            confirmed = True
+        if confirmed:
             taskWidget: Task = self.parent()
 
             if hasattr(taskWidget.parent(), "subtasks"):
@@ -307,7 +313,7 @@ class TaskHeader(QWidget):
                     "subtasks": []
                 }
     
-                newSubtask = Task(newSubtaskData, self.dbManager)
+                newSubtask = Task(newSubtaskData, self.dbManager, self.confManager)
                 self.parent().subtasksLayout.addWidget(newSubtask)
                 newSubtask.setVisible(self.parent().expanded)
                 self.parent().subtasks.append(newSubtask)

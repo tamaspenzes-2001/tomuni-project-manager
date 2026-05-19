@@ -19,6 +19,6 @@ class AppUI(QMainWindow):
     def loadProject(self, projectData):
         self.project.deleteLater()
 
-        self.project = Project(projectData, self.dbManager)
+        self.project = Project(projectData, self.dbManager, self.confManager)
         self.splitter.addWidget(self.project)
         self.splitter.setCollapsible(1, False)

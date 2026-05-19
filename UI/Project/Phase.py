@@ -5,12 +5,14 @@ from typing import Dict
 from UI.Project.Task import Task
 from UI.Dialogs.TaskDialog import TaskDialog
 from DataManager.DatabaseManager import DatabaseManager
+from DataManager.ConfigManager import ConfigManager
 
 class Phase(QWidget):
-    def __init__(self, phaseData: Dict, dbManager: DatabaseManager):
+    def __init__(self, phaseData: Dict, dbManager: DatabaseManager, confManager: ConfigManager):
         super().__init__()
         self.phaseData: Dict = phaseData
         self.dbManager: DatabaseManager = dbManager
+        self.confManager: ConfigManager = confManager
         
         self.name = QLabel(phaseData["name"])
         self.scrollArea = QScrollArea()
@@ -18,7 +20,7 @@ class Phase(QWidget):
         self.tasksLayout = QVBoxLayout()
         self.tasks.setLayout(self.tasksLayout)
         for task in phaseData["tasks"]:
-            self.tasksLayout.addWidget(Task(task, dbManager))
+            self.tasksLayout.addWidget(Task(task, dbManager, confManager))
         self.tasksLayout.addStretch()
 
         self.scrollArea.setWidget(self.tasks)
@@ -66,7 +68,7 @@ class Phase(QWidget):
 
                 self.phaseData["tasks"].append(newTaskData)
 
-                newTask = Task(newTaskData, self.dbManager)
+                newTask = Task(newTaskData, self.dbManager, self.confManager)
                 self.tasksLayout.insertWidget(self.tasksLayout.count() - 1, newTask)
 
                 query, _ = self.dbManager.executeQuery(

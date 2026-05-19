@@ -7,12 +7,14 @@ from datetime import date
 from UI.Dialogs.ProjectDialog import ProjectDialog
 from UI.Project.Phase import Phase
 from DataManager.DatabaseManager import DatabaseManager
+from DataManager.ConfigManager import ConfigManager
 
 class ProjectHeader(QWidget):
-    def __init__(self, projectData: Dict, dbManager: DatabaseManager):
+    def __init__(self, projectData: Dict, dbManager: DatabaseManager, confManager: ConfigManager):
         super().__init__()
         self.projectData: Dict = projectData
         self.dbManager: DatabaseManager = dbManager
+        self.confManager: ConfigManager = confManager
 
         self.name = QLabel(projectData["name"])
         self.menuButton = QToolButton()
@@ -176,7 +178,7 @@ class ProjectHeader(QWidget):
                     "tasks": rootTasks 
                 }
 
-                widget = Phase(phaseData, self.dbManager)
+                widget = Phase(phaseData, self.dbManager, self.confManager)
                 self.parent().phasesLayout.addWidget(widget)
                 self.parent().phases[dbId] = widget
 

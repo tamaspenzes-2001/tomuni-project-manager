@@ -7,9 +7,10 @@ from UI.Project.TaskHeader import TaskHeader
 from UI.Project.TaskArtifactSection import TaskArtifactSection
 from UI.Dialogs.TaskDialog import TaskDialog
 from DataManager.DatabaseManager import DatabaseManager
+from DataManager.ConfigManager import ConfigManager
 
 class Task(QWidget):
-    def __init__(self, taskData: Dict, dbManager: DatabaseManager):
+    def __init__(self, taskData: Dict, dbManager: DatabaseManager, confManager: ConfigManager):
         super().__init__()
         self.taskData: Dict = taskData
         self.expanded: bool = True
@@ -21,7 +22,7 @@ class Task(QWidget):
         self.expandCollapseLayout.addWidget(self.expandCollapseButton)
         self.expandCollapseLayout.addStretch()
 
-        self.header = TaskHeader(taskData, dbManager)
+        self.header = TaskHeader(taskData, dbManager, confManager)
         self.description = QLabel(taskData["description"])
         self.description.setTextFormat(Qt.MarkdownText)
         self.artifactTemplates = TaskArtifactSection(
@@ -30,7 +31,7 @@ class Task(QWidget):
         self.artifacts = TaskArtifactSection(taskData["id"], taskData["artifacts"], dbManager)
 
         self.subtasksLayout = QVBoxLayout()
-        self.subtasks: List[Task] = [Task(subtask, dbManager) for subtask in taskData["subtasks"]]
+        self.subtasks: List[Task] = [Task(subtask, dbManager, confManager) for subtask in taskData["subtasks"]]
         for subtask in self.subtasks:
             self.subtasksLayout.addWidget(subtask)
 

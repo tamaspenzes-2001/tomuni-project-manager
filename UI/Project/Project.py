@@ -3,11 +3,12 @@ from typing import Dict
 from UI.Project.ProjectHeader import ProjectHeader
 from UI.Project.Phase import Phase
 from DataManager.DatabaseManager import DatabaseManager
+from DataManager.ConfigManager import ConfigManager
 
 class Project(QWidget):
-    def __init__(self, projectData: Dict, dbManager: DatabaseManager):
+    def __init__(self, projectData: Dict, dbManager: DatabaseManager, confManager: ConfigManager):
         super().__init__()
-        self.header = ProjectHeader(projectData, dbManager)
+        self.header = ProjectHeader(projectData, dbManager, confManager)
         self.scrollArea = QScrollArea()
         self.phasesContainer = QWidget()
         self.phasesLayout = QHBoxLayout()
@@ -17,7 +18,7 @@ class Project(QWidget):
         self.phases: Dict = {}
 
         for phase_data in projectData["phases"]:
-            phase_widget = Phase(phase_data, dbManager)
+            phase_widget = Phase(phase_data, dbManager, confManager)
             self.phases[phase_data["id"]] = phase_widget
             self.phasesLayout.addWidget(phase_widget)
         
