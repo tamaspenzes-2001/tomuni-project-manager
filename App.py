@@ -5,7 +5,8 @@ from DataManager.DatabaseManager import DatabaseManager
 from UI.AppUI import AppUI
 
 class App(AppUI):
-    def __init__(self):
+    def __init__(self, app):
+        self.app = app
         self.confManager = ConfigManager()
         self.dbManager = DatabaseManager()
         super().__init__()

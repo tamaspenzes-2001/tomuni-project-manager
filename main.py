@@ -8,6 +8,6 @@ if __name__ == "__main__":
     app.setApplicationName("TomUni")
     app.setDesktopFileName("io.github.tamaspenzes-2001.tomuni")
 
-    window = App()
+    window = App(app)
     window.show()
     sys.exit(app.exec())
