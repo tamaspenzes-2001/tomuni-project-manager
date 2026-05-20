@@ -6,7 +6,7 @@ from UI.AppUI import AppUI
 
 class App(AppUI):
     def __init__(self, app):
-        self.app = app
+        self.app: QApplication = app
         self.confManager = ConfigManager()
         self.dbManager = DatabaseManager()
         super().__init__()
