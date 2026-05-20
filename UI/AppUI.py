@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget, QDialog
+from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget, QDialog, QMessageBox
 from PySide6.QtCore import Qt
 from datetime import date
 from UI.Sidebar.Sidebar import Sidebar
@@ -54,4 +54,18 @@ class AppUI(QMainWindow):
             self.confManager.saveConfig()
 
     def showAbout(self):
-        pass
+        about = QMessageBox(self)
+        about.setWindowTitle("About TomUni")
+        about.setText("""
+            Made by Tamás Pénzes<br>
+            Version: 1.0<br>
+            Python version: 3.13.5<br>
+            Qt Version: 6.11.0 (PySide6)<br>
+            Compiled into C using Nuitka<br>
+            Config directory: ~/.config/TomUni<br>
+            License: GPL v3<br>
+            <a href="https://github.com/tamaspenzes-2001/tomuni-project-manager">Visit source code repository</a>
+        """)
+        about.setTextFormat(Qt.RichText)
+        about.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        about.exec()
