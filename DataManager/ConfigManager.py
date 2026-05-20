@@ -19,7 +19,3 @@ class ConfigManager:
     def saveConfig(self):
         with open(dataPath("config.json"), "w") as config:
             json.dump(self.config, config)
-
-    def toggleSetting(self, setting, state):
-        self.config[setting] = state
-        self.saveConfig()

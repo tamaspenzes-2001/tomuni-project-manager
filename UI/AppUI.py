@@ -1,8 +1,9 @@
-from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget
+from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget, QDialog
 from PySide6.QtCore import Qt
 from datetime import date
 from UI.Sidebar.Sidebar import Sidebar
 from UI.Project.Project import Project
+from UI.Dialogs.SettingsDialog import SettingsDialog
 
 class AppUI(QMainWindow):
     def __init__(self):
@@ -40,7 +41,17 @@ class AppUI(QMainWindow):
         self.splitter.setCollapsible(1, False)
 
     def modifySettings(self):
-        pass
+        dialog = SettingsDialog(self.confManager.config)
+        result = dialog.exec()
+        if result == QDialog.DialogCode.Accepted:
+            self.confManager.config = {
+                "delConfirmProjectTemplates": dialog.resultDelConfirmProjectTemplates,
+                "delConfirmTasks": dialog.resultDelConfirmTasks,
+                "dateFormat": dialog.resultDateFormat,
+                "encryptionEnabled": dialog.resultEncryption,
+                "encryptionPassword": dialog.resultEncryptionPassword
+            }
+            self.confManager.saveConfig()
 
     def showAbout(self):
         pass
