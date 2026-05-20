@@ -1,9 +1,11 @@
 from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget, QDialog, QMessageBox
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap
 from datetime import date
 from UI.Sidebar.Sidebar import Sidebar
 from UI.Project.Project import Project
 from UI.Dialogs.SettingsDialog import SettingsDialog
+from helpers import assetPath
 
 class AppUI(QMainWindow):
     def __init__(self):
@@ -68,4 +70,5 @@ class AppUI(QMainWindow):
         """)
         about.setTextFormat(Qt.RichText)
         about.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        about.setIconPixmap(QPixmap(assetPath("logo.png")))
         about.exec()
