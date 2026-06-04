@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget, QDialog, QMessageBox
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QByteArray
 from PySide6.QtGui import QPixmap
 from datetime import date
+from typing import List
 from UI.Sidebar.Sidebar import Sidebar
 from UI.Project.Project import Project
 from UI.Dialogs.SettingsDialog import SettingsDialog
@@ -36,11 +37,17 @@ class AppUI(QMainWindow):
         self.aboutAction.triggered.connect(self.showAbout)
 
     def loadProject(self, projectData):
-        self.project.deleteLater()
+        currentSizes: List = self.splitter.sizes()
+        targetProjectWidth: int = currentSizes[1] if len(currentSizes) > 1 and currentSizes[1] > 0 else 600
 
-        self.project = Project(projectData, self.dbManager, self.confManager)
-        self.splitter.addWidget(self.project)
+        project = Project(projectData, self.dbManager, self.confManager)
+        
+        self.splitter.replaceWidget(1, project)
         self.splitter.setCollapsible(1, False)
+        self.splitter.setSizes([currentSizes[0], targetProjectWidth])
+        self.splitter.update()
+        self.project: Project = project
+        self.project.update()
 
     def modifySettings(self):
         dialog = SettingsDialog(self.confManager.config)

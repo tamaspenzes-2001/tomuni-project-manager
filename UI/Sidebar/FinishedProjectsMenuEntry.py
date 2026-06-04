@@ -13,6 +13,8 @@ class FinishedProjectsMenuEntry(QWidget):
         self.layout.addWidget(self.name)
         self.setLayout(self.layout)
         self.mouseReleaseEvent = self.openProject
+        self.setAttribute(Qt.WA_StyledBackground)
+        self.setProperty("class", "bottom-border")
 
     def openProject(self, event):
         projectQuery, success = self.dbManager.executeQuery(

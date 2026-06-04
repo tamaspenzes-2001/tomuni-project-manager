@@ -16,14 +16,20 @@ class Attachment(QWidget):
         self.iconLabel = QLabel()
         self.iconLabel.setPixmap(qta.icon("mdi.paperclip").pixmap(24, 24))
         self.fileName = QLabel(filePath.split("/")[-1])
-        self.deleteButton = QPushButton("x")
+        self.deleteButton = QPushButton("")
+        self.deleteButton.setIcon(qta.icon("fa6s.xmark"))
+        self.deleteButton.setProperty("class", "button red-button rounded-button")
         self.deleteButton.clicked.connect(self.deleteAttachment)
 
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.iconLabel)
         self.layout.addWidget(self.fileName)
         self.layout.addWidget(self.deleteButton)
+        self.layout.setContentsMargins(5, 5, 5, 5)
+        self.layout.setSpacing(5)
         self.setLayout(self.layout)
+        self.setAttribute(Qt.WA_StyledBackground)
+        self.setProperty("class", "content-box")
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -53,6 +59,6 @@ class Attachment(QWidget):
         )
         
         if success:
-            self.deleteLater()
+            self.parent().deleteLater()
         else:
             QMessageBox.warning(self, "Error", "Failed to delete attachment from database.")

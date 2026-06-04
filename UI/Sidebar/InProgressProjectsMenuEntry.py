@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QMainWindow
+from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QMainWindow, QSizePolicy
 from PySide6.QtCore import Qt, QDate
 import qtawesome as qta
 from typing import Dict, List
@@ -14,6 +14,9 @@ class InProgressProjectsMenuEntry(QWidget):
         self.name = QLabel(name)
         self.completeButton = QPushButton()
         self.completeButton.setIcon(qta.icon("fa5s.check"))
+        self.completeButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.completeButton.setProperty("class", "button green-button")
+        self.completeButton.clicked.connect(self.completeProject)
 
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.name)
@@ -21,7 +24,8 @@ class InProgressProjectsMenuEntry(QWidget):
         self.setLayout(self.layout)
 
         self.mouseReleaseEvent = self.openProject
-        self.completeButton.clicked.connect(self.completeProject)
+        self.setAttribute(Qt.WA_StyledBackground)
+        self.setProperty("class", "bottom-border")
 
     def openProject(self, event):
         projectQuery, success = self.dbManager.executeQuery(

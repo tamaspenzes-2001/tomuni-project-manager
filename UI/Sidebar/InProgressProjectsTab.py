@@ -25,16 +25,21 @@ class InProgressProjectsTab(QWidget):
             )
             self.menuLayout.addWidget(menuEntry)
         self.menuLayout.addStretch()
+        self.menuLayout.setContentsMargins(0, 0, 0, 0)
+        self.menuLayout.setSpacing(0)
         self.menu.setLayout(self.menuLayout)
         self.scrollArea.setWidget(self.menu)
         self.scrollArea.setWidgetResizable(True)
 
         self.createButton = QPushButton("Create project")
+        self.createButton.setProperty("class", "button blue-button")
         self.createButton.clicked.connect(self.createProject)
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.scrollArea)
         self.layout.addWidget(self.createButton)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
         self.setLayout(self.layout)
 
     def createProject(self):

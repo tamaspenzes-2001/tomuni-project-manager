@@ -17,6 +17,7 @@ class ProjectHeader(QWidget):
         self.confManager: ConfigManager = confManager
 
         self.name = QLabel(projectData["name"])
+        self.name.setProperty("class", "heading")
         self.menuButton = QToolButton()
         self.menuButton.setAutoRaise(True)
         self.menuButton.setPopupMode(QToolButton.InstantPopup)

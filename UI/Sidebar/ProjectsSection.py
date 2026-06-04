@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QLabel, QTabWidget, QVBoxLayout
+from PySide6.QtCore import Qt
 from UI.Sidebar.InProgressProjectsTab import InProgressProjectsTab
 from UI.Sidebar.FinishedProjectsTab import FinishedProjectsTab
 from DataManager.DatabaseManager import DatabaseManager
@@ -7,6 +8,8 @@ class ProjectsSection(QWidget):
     def __init__(self, dbManager: DatabaseManager):
         super().__init__()
         self.heading = QLabel("Projects")
+        self.heading.setProperty("class", "heading")
+        self.heading.setAlignment(Qt.AlignCenter)
         self.menu = QTabWidget()
         self.inProgressProjectsTab = InProgressProjectsTab(dbManager)
         self.finishedProjectsTab = FinishedProjectsTab(dbManager)

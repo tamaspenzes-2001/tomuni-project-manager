@@ -11,6 +11,9 @@ if __name__ == "__main__":
     app.setDesktopFileName("io.github.tamaspenzes-2001.tomuni")
     app.setWindowIcon(QIcon(assetPath("logo.png")))
 
+    with open(assetPath("style.css"), "r") as stylesheet:
+        app.setStyleSheet(stylesheet.read())
+
     window = App(app)
     window.show()
     sys.exit(app.exec())

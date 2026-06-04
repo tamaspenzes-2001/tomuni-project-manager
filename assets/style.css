@@ -1,0 +1,86 @@
+.content-box, QTabWidget::pane {
+    border: 1px solid grey;
+}
+
+QTabBar::tab {
+    padding: 5px 10px;
+    font-size: 17px;
+}
+
+QTabBar::tab:selected {
+    border: 1px solid grey;
+}
+
+QTabBar::tab:!selected {
+    margin-top: 5px; /* make non-selected tabs look smaller */
+    border: 1px solid #707070;
+    color: #707070;
+}
+
+.bottom-border {
+    border-bottom: 1px solid grey;
+}
+
+.heading {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.subheading {
+    padding: 5px 0;
+    font-size: 17px;
+}
+
+.button {
+    width: 20px;
+    height: 20px;
+    padding: 4px;
+}
+
+.rounded-button {
+    border: 1px solid grey;
+    border-radius: 12px;
+    padding: 2px;
+}
+
+.blue-button {
+    background-color: #0d0da5;    
+}
+
+.red-button {
+    background-color: red;
+}
+
+.green-button {
+    background-color: #106408;   
+}
+
+QCheckBox {
+    spacing: 10px;
+}
+
+QCheckBox:checked {
+    color: lightgrey;
+}
+
+QCheckBox:indeterminate {
+    font-weight: bold;
+}
+
+QCheckBox::indicator {
+    width: 30px;
+    height: 30px;
+    border: 1px solid grey;
+}
+
+QCheckBox::indicator:unchecked {
+    background-color: #920f0f;
+}
+
+QCheckBox::indicator:indeterminate {
+    background-color: orange;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #106408;
+}

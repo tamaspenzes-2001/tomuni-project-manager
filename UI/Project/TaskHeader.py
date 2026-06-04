@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import (QWidget, QCheckBox, QLabel, QToolButton, QMenu,
+from PySide6.QtWidgets import (QWidget, QCheckBox, QLabel, QToolButton, QMenu, QSizePolicy,
                                 QHBoxLayout, QVBoxLayout, QMessageBox, QDialog)
 from PySide6.QtGui import QAction, QTextDocument
 from PySide6.QtCore import Qt, QDate
@@ -14,13 +14,17 @@ class TaskHeader(QWidget):
         self.taskData: Dict = taskData
         self.dbManager: DatabaseManager = dbManager
         self.confManager: ConfigManager = confManager
+        self.expanded: bool = False
 
-        self.layout = QHBoxLayout()
-        self.setLayout(self.layout)
+        self.expandCollapseButton = QToolButton()
+        self.expandCollapseButton.setIcon(qta.icon("fa5s.chevron-right"))
+        self.expandCollapseButton.clicked.connect(self.expandCollapse)
 
         self.task = QCheckBox(taskData["name"])
         self.task.setTristate()
         self.task.setCheckState(taskData["state"])
+        self.task.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        self._setBoldCheckboxText()
 
         _originalMousePress = self.task.mousePressEvent
 
@@ -32,11 +36,8 @@ class TaskHeader(QWidget):
         self.task.mousePressEvent = _customMousePress
 
         self.task.checkStateChanged.connect(self.changeState)
-        self.layout.addWidget(self.task)
-        self.layout.addStretch()
 
         self.date = QLabel("")
-        self.layout.addWidget(self.date)
 
         # Initialize date label based on initial state
         self._updateDateLabel()
@@ -53,7 +54,6 @@ class TaskHeader(QWidget):
             """
         )
         self.menuButton.setIcon(qta.icon("msc.triangle-down"))
-        self.layout.addWidget(self.menuButton)
 
         self.menu = QMenu()
         self.editAction = QAction("Edit")
@@ -72,30 +72,56 @@ class TaskHeader(QWidget):
         ])
         self.menuButton.setMenu(self.menu)
 
-    def _updateDateLabel(self):
-        state = self.task.checkState()
-        hasStartDate = "startDate" in self.taskData and self.taskData["startDate"]
-        hasCompletionDate = "completionDate" in self.taskData and self.taskData["completionDate"]
+        self.layout = QHBoxLayout()
+        self.layout.addWidget(self.expandCollapseButton)
+        self.layout.addWidget(self.task)
+        self.layout.addStretch()
+        self.layout.addWidget(self.date)
+        self.layout.addWidget(self.menuButton)
+        self.setLayout(self.layout)
+
+    # OVERRIDDEN METHODS
+
+    def sizeHint(self):
+        # Calculate the width required for the text + checkbox + date + icons
+        text = self.task.text()
+        text_width = self.task.fontMetrics().horizontalAdvance(text)
         
-        if state == Qt.Unchecked:
-            self.date.setVisible(False)
-        elif state == Qt.PartiallyChecked:
-            if hasStartDate:
-                self.date.setText(f"Started at: {self.taskData['startDate']}")
-                self.date.setVisible(True)
-            else:
-                self.date.setVisible(False)
-        elif state == Qt.Checked:
-            if hasStartDate:
-                if hasCompletionDate:
-                    self.date.setText(f"{self.taskData['startDate']} - {self.taskData['completionDate']}")
-                else:
-                    self.date.setText(f"Started at: {self.taskData['startDate']}")
-                self.date.setVisible(True)
-            else:
-                self.date.setVisible(False)
+        checkbox_width = self.task.sizeHint().width()
+        date_width = self.date.fontMetrics().horizontalAdvance(self.date.text()) if self.date.isVisible() else 0
         
-        self.layout.update()
+        # Add padding for buttons and margins
+        total_width = text_width + checkbox_width + date_width
+        
+        # Return a hint that is definitely wide enough
+        hint = super().sizeHint()
+        hint.setWidth(max(hint.width(), total_width, 350)) # Increased minimum to 350
+        
+        return hint
+
+    def minimumSizeHint(self):
+        # Same logic as sizeHint but for minimums
+        text = self.task.text()
+        text_width = self.task.fontMetrics().horizontalAdvance(text)
+        checkbox_width = self.task.minimumSizeHint().width()
+        date_width = self.date.fontMetrics().horizontalAdvance(self.date.text()) if self.date.isVisible() else 0
+        
+        min_width = text_width + checkbox_width + date_width
+        hint = super().minimumSizeHint()
+        hint.setWidth(max(hint.width(), min_width, 350))
+        
+        return hint
+
+    def _updateContainerWidth(self):
+        taskWidget: Task = self.parent()
+
+        if hasattr(taskWidget.parent(), "subtasks"):
+            widgetToUpdate: Task = taskWidget.parent()
+        else:
+            widgetToUpdate: Phase = taskWidget.parent().parent().parent().parent()
+        
+        widgetToUpdate.updateGeometry()
+        widgetToUpdate.update()
 
     def changeState(self, state):
         stateMap: Dict = {
@@ -122,6 +148,94 @@ class TaskHeader(QWidget):
         self.taskData["state"] = state
 
         self._updateDateLabel()
+
+        if self.parent():
+            self.parent().updateGeometry()
+            if hasattr(self.parent(), 'parent') and self.parent().parent():
+                self.parent().parent().updateGeometry()
+
+        self._setBoldCheckboxText()
+
+        self._updateContainerWidth()
+
+    # HELPERS
+
+    def _setBoldCheckboxText(self):
+        currentFont = self.task.font()
+        if self.task.checkState() == Qt.PartiallyChecked:
+            currentFont.setBold(True)
+        else:
+            currentFont.setBold(False)
+        self.task.setFont(currentFont)
+
+    def _updateDateLabel(self):
+        state = self.task.checkState()
+        hasStartDate = "startDate" in self.taskData and self.taskData["startDate"]
+        hasCompletionDate = "completionDate" in self.taskData and self.taskData["completionDate"]
+        
+        if state == Qt.Unchecked:
+            self.date.setVisible(False)
+        elif state == Qt.PartiallyChecked:
+            if hasStartDate:
+                self.date.setText(f"Started at: {self.taskData['startDate']}")
+                self.date.setVisible(True)
+            else:
+                self.date.setVisible(False)
+        elif state == Qt.Checked:
+            if hasStartDate:
+                if hasCompletionDate:
+                    self.date.setText(f"{self.taskData['startDate']} - {self.taskData['completionDate']}")
+                else:
+                    self.date.setText(f"Started at: {self.taskData['startDate']}")
+                self.date.setVisible(True)
+            else:
+                self.date.setVisible(False)
+        
+        # self.layout.update()
+
+        if self.parent():
+            self.parent().updateGeometry()
+            self.parent().parent().updateGeometry()
+
+    # SLOTS
+
+    def expandCollapse(self):
+        from UI.Project.Project import Project
+
+        self.expanded = not self.expanded
+        self.parent().description.setVisible(self.expanded)
+        self.parent().artifactTemplates.setVisible(self.expanded)
+        self.parent().artifacts.setVisible(self.expanded)
+        for subtask in self.parent().subtasks:
+            subtask.setVisible(self.expanded)
+        icon: str = "fa5s.chevron-down" if self.expanded else "fa5s.chevron-right"
+        self.expandCollapseButton.setIcon(qta.icon(icon))
+
+        current_widget = self.parent() # This is the Task widget
+        while current_widget:
+            current_widget.updateGeometry()
+            current_widget.update()
+
+            # If we hit the Project widget, we are done
+            if isinstance(current_widget, Project):
+                break
+
+            current_widget = current_widget.parent()
+
+        # 4. Force the Project's layout to recalculate immediately
+        # This is the missing link: telling the Grid Layout to ignore cached sizes
+        if hasattr(self.parent(), 'parent'):
+            phase_widget = self.parent().parent()
+            if hasattr(phase_widget, 'parent'):
+                project_widget = phase_widget.parent()
+                if isinstance(project_widget, Project):
+                    # Force the scroll area to recalculate its contents
+                    project_widget.scrollArea.updateGeometry()
+                    project_widget.updateGeometry()
+                    project_widget.update()
+
+                    # Force the grid layout to recalculate columns
+                    project_widget.phasesLayout.activate()
         
     def edit(self):
         dialog = TaskDialog(self.taskData)
@@ -141,6 +255,8 @@ class TaskHeader(QWidget):
                 [name, description, self.taskData["id"]]
             )
 
+            self._updateContainerWidth()
+
     def delete(self):
         from UI.Project.Task import Task
         from UI.Project.Phase import Phase
@@ -158,7 +274,7 @@ class TaskHeader(QWidget):
             if hasattr(taskWidget.parent(), "subtasks"):
                 parentTask: Task = taskWidget.parent()
                 parentTask.subtasks.remove(taskWidget)
-                parentTask.subtasksLayout.removeWidget(taskWidget)
+                parentTask.taskBodyLayout.removeWidget(taskWidget)
                 taskWidget.deleteLater()
             else:
                 phaseWidget: Phase = taskWidget.parent().parent().parent().parent()
@@ -170,6 +286,8 @@ class TaskHeader(QWidget):
                         phaseWidget.tasksLayout.removeWidget(taskWidget)
                         taskWidget.deleteLater()
                         break
+
+            self._updateContainerWidth()
                     
             self.dbManager.executeQuery("DELETE FROM Task WHERE id = ?", [self.taskData["id"]])
 
@@ -179,8 +297,8 @@ class TaskHeader(QWidget):
         taskWidget: Task = self.parent()
         layout: QVBoxLayout = None
 
-        if hasattr(taskWidget.parent(), "subtasksLayout"):
-            layout = taskWidget.parent().subtasksLayout
+        if hasattr(taskWidget.parent(), "taskBodyLayout"):
+            layout = taskWidget.parent().taskBodyLayout
         else:
             layout = taskWidget.parent().parent().parent().parent().tasksLayout
 
@@ -223,8 +341,8 @@ class TaskHeader(QWidget):
         taskWidget: Task = self.parent()
         layout: QVBoxLayout = None
 
-        if hasattr(taskWidget.parent(), "subtasksLayout"):
-            layout = taskWidget.parent().subtasksLayout
+        if hasattr(taskWidget.parent(), "taskBodyLayout"):
+            layout = taskWidget.parent().taskBodyLayout
         else:
             layout = taskWidget.parent().parent().parent().parent().tasksLayout
 
@@ -314,8 +432,8 @@ class TaskHeader(QWidget):
                 }
     
                 newSubtask = Task(newSubtaskData, self.dbManager, self.confManager)
-                self.parent().subtasksLayout.addWidget(newSubtask)
-                newSubtask.setVisible(self.parent().expanded)
+                self.parent().taskBodyLayout.addWidget(newSubtask)
+                newSubtask.setVisible(self.expanded)
                 self.parent().subtasks.append(newSubtask)
 
                 query, _ = self.dbManager.executeQuery(
@@ -330,3 +448,5 @@ class TaskHeader(QWidget):
                     "UPDATE Task SET position = ? WHERE id = ?",
                     [newPosition, maxId]
                 )
+            
+            self._updateContainerWidth()
