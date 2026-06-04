@@ -8,12 +8,14 @@ class SettingsDialog(QDialog):
         self.setWindowTitle("Settings")
 
         self.delConfirmLabel = QLabel("Deletion confirmation for...")
+        self.delConfirmLabel.setProperty("class", "dialog-heading")
         self.delConfirmProjectTemplates = QCheckBox("Project templates")
         self.delConfirmProjectTemplates.setChecked(config["delConfirmProjectTemplates"])
         self.delConfirmTasks = QCheckBox("Tasks")
         self.delConfirmTasks.setChecked(config["delConfirmTasks"])
 
         self.otherSettingsLabel = QLabel("Other settings")
+        self.otherSettingsLabel.setProperty("class", "dialog-heading")
 
         self.dateFormatLabel = QLabel("Date format (<a href='https://www.strfti.me/'>strftime</a>):")
         self.dateFormatLabel.setOpenExternalLinks(True)
@@ -26,10 +28,13 @@ class SettingsDialog(QDialog):
 
         self.encryption = QCheckBox("Enable password encryption")
         self.encryption.setChecked(config["encryptionEnabled"])
+
         self.encryption.checkStateChanged.connect(self.toggleEncryption)
         self.encryptionPasswordLabel = QLabel("Encryption password:")
+        self.encryptionPasswordLabel.setVisible(config["encryptionEnabled"])
         self.encryptionPasswordField = QLineEdit()
         self.encryptionPasswordField.setText(config["encryptionPassword"])
+        self.encryptionPasswordField.setVisible(config["encryptionEnabled"])
 
         self.encryptionLayout = QVBoxLayout()
         self.encryptionLayout.addWidget(self.encryption)
@@ -38,8 +43,10 @@ class SettingsDialog(QDialog):
 
         self.okButton = QPushButton("Ok")
         self.okButton.clicked.connect(self.okAction)
+        self.okButton.setProperty("class", "blue-button")
         self.cancelButton = QPushButton("Cancel")
         self.cancelButton.clicked.connect(self.cancelAction)
+        self.cancelButton.setProperty("class", "dark-red-button")
 
         self.dialogButtonLayout = QHBoxLayout()
         self.dialogButtonLayout.addStretch()

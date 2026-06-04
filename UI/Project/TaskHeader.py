@@ -45,14 +45,6 @@ class TaskHeader(QWidget):
         self.menuButton = QToolButton()
         self.menuButton.setAutoRaise(True)
         self.menuButton.setPopupMode(QToolButton.InstantPopup)
-        self.menuButton.setStyleSheet(
-            """
-            QToolButton::menu-indicator {
-                width: 0px;
-                width: 0px;
-            }
-            """
-        )
         self.menuButton.setIcon(qta.icon("msc.triangle-down"))
 
         self.menu = QMenu()
@@ -431,7 +423,7 @@ class TaskHeader(QWidget):
                     "subtasks": []
                 }
     
-                newSubtask = Task(newSubtaskData, self.dbManager, self.confManager)
+                newSubtask = Task(newSubtaskData, self.dbManager, self.confManager, isSubtask=True)
                 self.parent().taskBodyLayout.addWidget(newSubtask)
                 newSubtask.setVisible(self.expanded)
                 self.parent().subtasks.append(newSubtask)

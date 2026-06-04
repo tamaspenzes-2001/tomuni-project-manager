@@ -7,7 +7,7 @@ from DataManager.DatabaseManager import DatabaseManager
 from DataManager.ConfigManager import ConfigManager
 
 class Task(QWidget):
-    def __init__(self, taskData: Dict, dbManager: DatabaseManager, confManager: ConfigManager):
+    def __init__(self, taskData: Dict, dbManager: DatabaseManager, confManager: ConfigManager, isSubtask: bool = False):
         super().__init__()
         self.taskData: Dict = taskData
 
@@ -30,9 +30,10 @@ class Task(QWidget):
         self.taskBodyLayout.addWidget(self.artifacts)
         self.taskBodyLayout.setContentsMargins(30, 0, 0, 0)
         
-        self.subtasks: List[Task] = [Task(subtask, dbManager, confManager) for subtask in taskData["subtasks"]]
+        self.subtasks: List[Task] = [Task(subtask, dbManager, confManager, isSubtask=True) for subtask in taskData["subtasks"]]
         for subtask in self.subtasks:
             subtask.setVisible(False)
+            subtask.setProperty("class", "top-border")
             self.taskBodyLayout.addWidget(subtask)
 
         self.layout = QVBoxLayout()
@@ -41,7 +42,8 @@ class Task(QWidget):
 
         self.setLayout(self.layout)
         self.setAttribute(Qt.WA_StyledBackground)
-        self.setProperty("class", "bottom-border")
+        classValue = "top-border" if isSubtask else "bottom-border"
+        self.setProperty("class", classValue)
 
         self.updateGeometry()
         self.update()

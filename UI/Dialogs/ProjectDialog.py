@@ -68,8 +68,10 @@ class ProjectDialog(QDialog):
 
         self.okButton = QPushButton("Ok")
         self.okButton.clicked.connect(self.okAction)
+        self.okButton.setProperty("class", "blue-button")
         self.cancelButton = QPushButton("Cancel")
         self.cancelButton.clicked.connect(self.cancelAction)
+        self.cancelButton.setProperty("class", "dark-red-button")
 
         self.dialogButtonLayout = QHBoxLayout()
         self.dialogButtonLayout.addStretch()

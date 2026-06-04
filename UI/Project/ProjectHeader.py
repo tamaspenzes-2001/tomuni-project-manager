@@ -21,14 +21,6 @@ class ProjectHeader(QWidget):
         self.menuButton = QToolButton()
         self.menuButton.setAutoRaise(True)
         self.menuButton.setPopupMode(QToolButton.InstantPopup)
-        self.menuButton.setStyleSheet(
-            """
-            QToolButton::menu-indicator {
-                width: 0px;
-                width: 0px;
-            }
-            """
-        )
         self.menuButton.setIcon(qta.icon("msc.triangle-down"))
         self.menu = QMenu()
         self.menuButton.setMenu(self.menu)

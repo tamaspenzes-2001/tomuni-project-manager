@@ -4,7 +4,6 @@
 
 QTabBar::tab {
     padding: 5px 10px;
-    font-size: 17px;
 }
 
 QTabBar::tab:selected {
@@ -19,6 +18,10 @@ QTabBar::tab:!selected {
 
 .bottom-border {
     border-bottom: 1px solid grey;
+}
+
+.top-border {
+    border-top: 1px solid grey;
 }
 
 .heading {
@@ -55,32 +58,55 @@ QTabBar::tab:!selected {
     background-color: #106408;   
 }
 
-QCheckBox {
+Task QCheckBox {
     spacing: 10px;
 }
 
-QCheckBox:checked {
-    color: lightgrey;
-}
-
-QCheckBox:indeterminate {
+Task QCheckBox:indeterminate {
     font-weight: bold;
 }
 
-QCheckBox::indicator {
+Task QCheckBox::indicator {
     width: 30px;
     height: 30px;
     border: 1px solid grey;
 }
 
-QCheckBox::indicator:unchecked {
+Task QCheckBox::indicator:unchecked {
     background-color: #920f0f;
 }
 
-QCheckBox::indicator:indeterminate {
+Task QCheckBox::indicator:indeterminate {
     background-color: orange;
 }
 
-QCheckBox::indicator:checked {
+Task QCheckBox::indicator:checked {
     background-color: #106408;
+}
+
+QPushButton {
+    color: white;
+}
+
+QToolButton::menu-indicator {
+    width: 0;
+}
+
+/* Dialog styles */
+
+QLineEdit, QTextEdit, QListWidget {
+    border: 1px solid lightblue;
+}
+
+.dark-red-button {
+    background-color: #920f0f;
+}
+
+.right-border {
+    border-right: 1px solid grey;
+}
+
+.dialog-heading {
+    font-size: 17px;
+    font-weight: bold;
 }
