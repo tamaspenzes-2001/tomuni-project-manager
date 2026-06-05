@@ -5,8 +5,8 @@ from DataManager.DatabaseManager import DatabaseManager
 class FinishedProjectsMenuEntry(QWidget):
     def __init__(self, name: str, id: int, dbManager: DatabaseManager):
         super().__init__()
-        self.dbManager =  dbManager
-        self.id = id
+        self.dbManager: DatabaseManager = dbManager
+        self.id: int = id
 
         self.name = QLabel(name)
         self.layout = QHBoxLayout()
@@ -87,7 +87,7 @@ class FinishedProjectsMenuEntry(QWidget):
             rootTasks: List = []
 
             for task in allTasks:
-                parentId = task["parentTaskId"]
+                parentId: int = task["parentTaskId"]
                 
                 if parentId is None or parentId == "" or parentId == 0:
                     rootTasks.append(task)

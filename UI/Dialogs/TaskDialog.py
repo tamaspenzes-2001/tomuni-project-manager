@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QTextCursor, QTextDocument
 import qtawesome as qta
 from typing import Dict
+from UI.Dialogs.DialogButtonBox import DialogButtonBox
 
 class TaskDialog(QDialog):
     def __init__(self, data: Dict = {}):
@@ -65,30 +66,22 @@ class TaskDialog(QDialog):
         self.descriptionLayout.addWidget(self.descriptionLabel)
         self.descriptionLayout.addWidget(self.description)
 
-        self.okButton = QPushButton("Ok")
-        self.okButton.clicked.connect(self.okAction)
-        self.okButton.setProperty("class", "blue-button")
-        self.cancelButton = QPushButton("Cancel")
-        self.cancelButton.clicked.connect(self.cancelAction)
-        self.cancelButton.setProperty("class", "dark-red-button")
-
-        self.dialogButtonLayout = QHBoxLayout()
-        self.dialogButtonLayout.addStretch()
-        self.dialogButtonLayout.addWidget(self.okButton)
-        self.dialogButtonLayout.addWidget(self.cancelButton)
+        self.buttonBox = DialogButtonBox()
+        self.buttonBox.okButton.clicked.connect(self.okAction)
+        self.buttonBox.cancelButton.clicked.connect(self.cancelAction)
 
         self.layout = QVBoxLayout()
         self.layout.addLayout(self.nameLayout)
         self.layout.addLayout(self.descriptionLayout)
-        self.layout.addLayout(self.dialogButtonLayout)
+        self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
     def formatBold(self):
         cursor: QTextCursor = self.descriptionField.textCursor()
         if cursor.hasSelection():
-            selected_text: str = cursor.selectedText()
-            formatted_text: str = f"**{selected_text}**"
-            cursor.insertText(formatted_text)
+            selectedText: str = cursor.selectedText()
+            formattedText: str = f"**{selectedText}**"
+            cursor.insertText(formattedText)
         else:
             cursor.insertText("****")
             pos: int = cursor.position()
@@ -98,9 +91,9 @@ class TaskDialog(QDialog):
     def formatItalic(self):
         cursor: QTextCursor = self.descriptionField.textCursor()
         if cursor.hasSelection():
-            selected_text: str = cursor.selectedText()
-            formatted_text: str = f"*{selected_text}*"
-            cursor.insertText(formatted_text)
+            selectedText: str = cursor.selectedText()
+            formattedText: str = f"*{selectedText}*"
+            cursor.insertText(formattedText)
         else:
             cursor.insertText("**")
             pos: int = cursor.position()
@@ -108,9 +101,9 @@ class TaskDialog(QDialog):
             self.descriptionField.setTextCursor(cursor)
 
     def updatePreview(self):
-        markdown_text = self.descriptionField.toPlainText()
+        markdownText: str = self.descriptionField.toPlainText()
         doc = QTextDocument()
-        doc.setMarkdown(markdown_text)
+        doc.setMarkdown(markdownText)
         self.renderedDescription.setText(doc.toHtml())
 
     def okAction(self):

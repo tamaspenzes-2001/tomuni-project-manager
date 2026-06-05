@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QDialog, QLabel, QCheckBox, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout
 from PySide6.QtCore import Qt
 from typing import Dict
+from UI.Dialogs.DialogButtonBox import DialogButtonBox
 
 class SettingsDialog(QDialog):
     def __init__(self, config: Dict):
@@ -41,17 +42,9 @@ class SettingsDialog(QDialog):
         self.encryptionLayout.addWidget(self.encryptionPasswordLabel)
         self.encryptionLayout.addWidget(self.encryptionPasswordField)
 
-        self.okButton = QPushButton("Ok")
-        self.okButton.clicked.connect(self.okAction)
-        self.okButton.setProperty("class", "blue-button")
-        self.cancelButton = QPushButton("Cancel")
-        self.cancelButton.clicked.connect(self.cancelAction)
-        self.cancelButton.setProperty("class", "dark-red-button")
-
-        self.dialogButtonLayout = QHBoxLayout()
-        self.dialogButtonLayout.addStretch()
-        self.dialogButtonLayout.addWidget(self.okButton)
-        self.dialogButtonLayout.addWidget(self.cancelButton)
+        self.buttonBox = DialogButtonBox()
+        self.buttonBox.okButton.clicked.connect(self.okAction)
+        self.buttonBox.cancelButton.clicked.connect(self.cancelAction)
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.delConfirmLabel)
@@ -61,12 +54,11 @@ class SettingsDialog(QDialog):
         self.layout.addLayout(self.dateFormatLayout)
         self.layout.addLayout(self.encryptionLayout)
         self.layout.addStretch()
-        self.layout.addLayout(self.dialogButtonLayout)
-
+        self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
     def toggleEncryption(self, state):
-        enabled = state == Qt.Checked
+        enabled: bool = state == Qt.Checked
         self.encryptionPasswordLabel.setVisible(enabled)
         self.encryptionPasswordField.setVisible(enabled)
 

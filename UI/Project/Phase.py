@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QScrollArea, QSizePolicy, QDialog, QVBoxLayout
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QTextDocument
 from typing import Dict
 from UI.Project.Task import Task
@@ -55,57 +55,45 @@ class Phase(QWidget):
         self.setLayout(self.layout)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.setMinimumWidth(0)
-        # self.setStyleSheet("background-color: lightblue;")
 
     def sizeHint(self):
-        # Calculate the maximum width required by any child task
-        max_width = 0
+        maxWidth: int = 0
         for i in range(self.tasksLayout.count()):
-            widget = self.tasksLayout.itemAt(i).widget()
+            widget: Task = self.tasksLayout.itemAt(i).widget()
             if widget:
-                # Get the size hint of the task widget
-                w = widget.sizeHint().width()
-                if w > max_width:
-                    max_width = w
+                width: int = widget.sizeHint().width()
+                if width > maxWidth:
+                    maxWidth = width
         
-        # Add some padding for the layout margins
-        base_hint = super().sizeHint()
-        # Return the max of the calculated width or the base hint
-        base_hint.setWidth(max(base_hint.width(), max_width + 20))
-        return base_hint
+        baseHint: QSize = super().sizeHint()
+        baseHint.setWidth(max(baseHint.width(), maxWidth + 20))
+        return baseHint
 
     def minimumSizeHint(self):
-        max_width = 0
+        maxWidth: int = 0
         for i in range(self.tasksLayout.count()):
-            widget = self.tasksLayout.itemAt(i).widget()
+            widget: Task = self.tasksLayout.itemAt(i).widget()
             if widget:
-                w = widget.minimumSizeHint().width()
-                if w > max_width:
-                    max_width = w
+                width: int = widget.minimumSizeHint().width()
+                if width > maxWidth:
+                    maxWidth = width
         
-        base_hint = super().minimumSizeHint()
-        base_hint.setWidth(max(base_hint.width(), max_width + 20))
-        return base_hint
+        baseHint: QSize = super().minimumSizeHint()
+        baseHint.setWidth(max(baseHint.width(), maxWidth + 20))
+        return baseHint
 
     def updateGeometry(self):
         self.tasks.updateGeometry()
-        
-        # 2. Update the scroll area (critical for setWidgetResizable(False))
         self.scrollArea.updateGeometry()
         
-        # 3. Update all children
         for i in range(self.tasksLayout.count()):
-            widget = self.tasksLayout.itemAt(i).widget()
+            widget: Task = self.tasksLayout.itemAt(i).widget()
             if widget:
                 widget.updateGeometry()
                 widget.update()
         
-        # 4. CRITICAL: Propagate the geometry change UP to the parent (Project)
-        # The standard updateGeometry() might stop at the Phase level.
-        # We need to tell the Project that our sizeHint has changed.
         if self.parent():
             self.parent().updateGeometry()
-            # Force the parent to recalculate its layout immediately
             self.parent().update()
         
         super().updateGeometry()

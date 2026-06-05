@@ -32,7 +32,7 @@ class TemplatesSection(QWidget):
 
     def createTemplate(self):
         dialog = ProjectDialog(template=True)
-        result = dialog.exec()
+        result: int = dialog.exec()
         if result == QDialog.Accepted:
             newTemplate = TemplatesMenuEntry(dialog.resultName)
             # add new item above the stretch (QSpacerItem)

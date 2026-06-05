@@ -215,33 +215,6 @@ class ProjectHeader(QWidget):
                     else:
                         task["artifacts"].append(query.value("filePath"))
                     break
-    
-    def _rebuildPhaseListFromDB(self, projectWidget, query):
-        while projectWidget.phasesLayout.count() > 0:
-            item: Phase = projectWidget.phasesLayout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-        
-        projectWidget.phases.clear()
-        
-        query, _ = self.dbManager.executeQuery(
-            "SELECT id, name FROM Phase WHERE projectId = ? ORDER BY id",
-            [self.projectData["id"]]
-        )
-        
-        while query.next():
-            dbId = query.value("id")
-            dbName = query.value("name")
-
-            phaseData = {
-                "id": dbId,
-                "name": dbName,
-                "tasks": []
-            }
-            
-            phaseWidget = Phase(phaseData, self.dbManager)
-            projectWidget.phasesLayout.addWidget(phaseWidget)
-            projectWidget.phases[dbId] = phaseWidget
             
     def createTemplate(self):
         pass

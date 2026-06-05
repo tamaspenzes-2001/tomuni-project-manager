@@ -5,9 +5,9 @@ from UI.Sidebar.InProgressProjectsMenuEntry import InProgressProjectsMenuEntry
 from DataManager.DatabaseManager import DatabaseManager
 
 class InProgressProjectsTab(QWidget):
-    def __init__(self, dbManager):
+    def __init__(self, dbManager: DatabaseManager):
         super().__init__()
-        self.dbManager = dbManager
+        self.dbManager: dbManager = dbManager
 
         self.scrollArea = QScrollArea()
         self.menu = QWidget()

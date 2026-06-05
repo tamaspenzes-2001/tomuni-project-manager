@@ -33,32 +33,30 @@ class TaskArtifactSection(QWidget):
             query, success = self.dbManager.executeQuery(queryStr, [taskId, templates] + filePaths)
             
             if success:
-                idMap: Dict = {}
+                idMap: Dict[str, int] = {}
                 while query.next():
                     idMap[query.value("filePath")] = query.value("id")
                 
                 for path in filePaths:
-                    artifactId = idMap.get(path)
+                    artifactId: int = idMap.get(path)
                     attachment = Attachment(path, artifactId, dbManager, templates)
 
-                    # --- NEW WRAPPER LOGIC ---
                     wrapper = QWidget()
-                    wrapper_layout = QHBoxLayout(wrapper)
-                    wrapper_layout.setContentsMargins(0, 7, 7, 0) # Internal padding creates the gap
-                    wrapper_layout.setSpacing(0)
-                    wrapper_layout.addWidget(attachment)
-                    wrapper_layout.addStretch() # Optional: helps alignment
-                    # -------------------------
+                    wrapperLayout = QHBoxLayout(wrapper)
+                    wrapperLayout.setContentsMargins(0, 7, 7, 0)
+                    wrapperLayout.setSpacing(0)
+                    wrapperLayout.addWidget(attachment)
+                    wrapperLayout.addStretch()
 
                     self.attachmentsLayout.addWidget(wrapper)
-        self.button_wrapper = QWidget()
-        button_layout = QHBoxLayout(self.button_wrapper)
-        button_layout.setContentsMargins(0, 7, 7, 0)
-        button_layout.setSpacing(0)
-        button_layout.addWidget(self.addAttachmentButton)
-        button_layout.addStretch()
+        self.buttonWrapper = QWidget()
+        buttonLayout = QHBoxLayout(self.buttonWrapper)
+        buttonLayout.setContentsMargins(0, 7, 7, 0)
+        buttonLayout.setSpacing(0)
+        buttonLayout.addWidget(self.addAttachmentButton)
+        buttonLayout.addStretch()
         
-        self.attachmentsLayout.addWidget(self.button_wrapper)
+        self.attachmentsLayout.addWidget(self.buttonWrapper)
         self.attachmentsLayout.setContentsMargins(2, 2, 2, 2)
         self.attachmentsLayout.setSpacing(15)
         
@@ -71,7 +69,7 @@ class TaskArtifactSection(QWidget):
     def addAttachment(self):
         fileName, fileChosen = QFileDialog.getOpenFileName(self)
         if fileChosen:
-            self.attachmentsLayout.removeWidget(self.button_wrapper)
+            self.attachmentsLayout.removeWidget(self.buttonWrapper)
             
             _, success = self.dbManager.executeQuery(
                 "INSERT INTO Artifact (filePath, template, taskId) VALUES (?, ?, ?)",
@@ -86,12 +84,12 @@ class TaskArtifactSection(QWidget):
                 newAttachment = Attachment(fileName, newId, self.dbManager, self.templates)
 
                 wrapper = QWidget()
-                wrapper_layout = QHBoxLayout(wrapper)
-                wrapper_layout.setContentsMargins(0, 7, 7, 0) # Internal padding creates the gap
-                wrapper_layout.setSpacing(0)
-                wrapper_layout.addWidget(newAttachment)
-                wrapper_layout.addStretch()
+                wrapperLayout = QHBoxLayout(wrapper)
+                wrapperLayout.setContentsMargins(0, 7, 7, 0)
+                wrapperLayout.setSpacing(0)
+                wrapperLayout.addWidget(newAttachment)
+                wrapperLayout.addStretch()
                 
                 self.attachmentsLayout.addWidget(wrapper)
-                self.attachmentsLayout.addWidget(self.button_wrapper)
+                self.attachmentsLayout.addWidget(self.buttonWrapper)
                 self.filePaths.append(fileName)

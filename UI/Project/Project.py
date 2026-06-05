@@ -22,7 +22,6 @@ class Project(QWidget):
         self.phasesContainer = QWidget()
         self.phasesContainer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.phasesContainer.setMinimumWidth(0)
-        # self.phasesContainer.setStyleSheet("background-color: lightgreen;")
         self.phasesLayout = QGridLayout()
         self.phasesContainer.setLayout(self.phasesLayout)
         self.scrollArea.setWidget(self.phasesContainer)

@@ -42,7 +42,7 @@ class Task(QWidget):
 
         self.setLayout(self.layout)
         self.setAttribute(Qt.WA_StyledBackground)
-        classValue = "top-border" if isSubtask else "bottom-border"
+        classValue: str = "top-border" if isSubtask else "bottom-border"
         self.setProperty("class", classValue)
 
         self.updateGeometry()

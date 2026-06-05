@@ -98,7 +98,7 @@ class InProgressProjectsMenuEntry(QWidget):
             rootTasks: List = []
 
             for task in allTasks:
-                parentId = task["parentTaskId"]
+                parentId: int = task["parentTaskId"]
                 
                 if parentId is None or parentId == "" or parentId == 0:
                     rootTasks.append(task)

@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import (QDialog, QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton,
                               QVBoxLayout, QHBoxLayout)
 from PySide6.QtCore import Qt
-from typing import Dict
+from typing import Dict, List
+from UI.Dialogs.DialogButtonBox import DialogButtonBox
 
 class ProjectDialog(QDialog):
     def __init__(self, template: bool = False, data: Dict = {}):
@@ -25,16 +26,16 @@ class ProjectDialog(QDialog):
         self.phasesData: List[Dict] = []
         if data and "phases" in data:
             for phase in data["phases"]:
-                phase_entry = {
+                phaseEntry: Dict = {
                     "id": phase.get("id"),
                     "name": phase["name"]
                 }
-                self.phasesData.append(phase_entry)
+                self.phasesData.append(phaseEntry)
                 newPhase = QListWidgetItem(phase["name"], self.phasesField)
                 newPhase.setFlags(newPhase.flags() | Qt.ItemIsEditable)
         else:
-            default_phases = ["Planning", "Implementation"]
-            for phase in default_phases:
+            defaultPhases: List[str] = ["Planning", "Implementation"]
+            for phase in defaultPhases:
                 self.phasesData.append({"id": None, "name": phase})
                 newPhase = QListWidgetItem(phase, self.phasesField)
                 newPhase.setFlags(newPhase.flags() | Qt.ItemIsEditable)
@@ -66,23 +67,14 @@ class ProjectDialog(QDialog):
         self.phasesLayout.addWidget(self.phasesLabel)
         self.phasesLayout.addLayout(self.phasesEditorLayout)
 
-        self.okButton = QPushButton("Ok")
-        self.okButton.clicked.connect(self.okAction)
-        self.okButton.setProperty("class", "blue-button")
-        self.cancelButton = QPushButton("Cancel")
-        self.cancelButton.clicked.connect(self.cancelAction)
-        self.cancelButton.setProperty("class", "dark-red-button")
-
-        self.dialogButtonLayout = QHBoxLayout()
-        self.dialogButtonLayout.addStretch()
-        self.dialogButtonLayout.addWidget(self.okButton)
-        self.dialogButtonLayout.addWidget(self.cancelButton)
+        self.buttonBox = DialogButtonBox()
+        self.buttonBox.okButton.clicked.connect(self.okAction)
+        self.buttonBox.cancelButton.clicked.connect(self.cancelAction)
 
         self.layout = QVBoxLayout()
         self.layout.addLayout(self.nameLayout)
         self.layout.addLayout(self.phasesLayout)
-        self.layout.addLayout(self.dialogButtonLayout)
-
+        self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
     def addPhase(self):

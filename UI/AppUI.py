@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget, QDialog, QMessage
 from PySide6.QtCore import Qt, QByteArray
 from PySide6.QtGui import QPixmap
 from datetime import date
-from typing import List
+from typing import List, Dict
 from UI.Sidebar.Sidebar import Sidebar
 from UI.Project.Project import Project
 from UI.Dialogs.SettingsDialog import SettingsDialog
@@ -51,9 +51,9 @@ class AppUI(QMainWindow):
 
     def modifySettings(self):
         dialog = SettingsDialog(self.confManager.config)
-        result = dialog.exec()
+        result: int = dialog.exec()
         if result == QDialog.DialogCode.Accepted:
-            self.confManager.config = {
+            self.confManager.config: Dict = {
                 "delConfirmProjectTemplates": dialog.resultDelConfirmProjectTemplates,
                 "delConfirmTasks": dialog.resultDelConfirmTasks,
                 "dateFormat": dialog.resultDateFormat,

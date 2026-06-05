@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt
 import qtawesome as qta
 
 class TemplatesMenuEntry(QWidget):
-    def __init__(self, text):
+    def __init__(self, text: str):
         super().__init__()
         self.name = QLabel(text)
         self.deleteButton = QPushButton()
@@ -18,7 +18,7 @@ class TemplatesMenuEntry(QWidget):
         self.layout.setSpacing(0)
         self.setLayout(self.layout)
 
-        self.mouseReleaseEvent=self.openTemplate
+        self.mouseReleaseEvent = self.openTemplate
         self.setAttribute(Qt.WA_StyledBackground)
         self.setProperty("class", "bottom-border")
 
