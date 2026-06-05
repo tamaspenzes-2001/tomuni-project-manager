@@ -13,7 +13,7 @@ class InProgressProjectsMenuEntry(QWidget):
 
         self.name = QLabel(name)
         self.completeButton = QPushButton()
-        self.completeButton.setIcon(qta.icon("fa5s.check"))
+        self.completeButton.setIcon(qta.icon("fa5s.check", color="white"))
         self.completeButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.completeButton.setProperty("class", "button green-button")
         self.completeButton.clicked.connect(self.completeProject)

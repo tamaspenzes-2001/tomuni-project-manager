@@ -17,7 +17,7 @@ class Attachment(QWidget):
         self.iconLabel.setPixmap(qta.icon("mdi.paperclip").pixmap(24, 24))
         self.fileName = QLabel(filePath.split("/")[-1])
         self.deleteButton = QPushButton("")
-        self.deleteButton.setIcon(qta.icon("fa6s.xmark"))
+        self.deleteButton.setIcon(qta.icon("fa6s.xmark", color="white"))
         self.deleteButton.setProperty("class", "button red-button rounded-button")
         self.deleteButton.clicked.connect(self.deleteAttachment)
 

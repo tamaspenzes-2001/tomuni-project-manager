@@ -19,7 +19,7 @@ class TaskArtifactSection(QWidget):
         self.labelLayout.addStretch()
 
         self.addAttachmentButton = QPushButton("")
-        self.addAttachmentButton.setIcon(qta.icon("ri.add-fill"))
+        self.addAttachmentButton.setIcon(qta.icon("ri.add-fill", color="white"))
         self.addAttachmentButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.addAttachmentButton.setProperty("class", "button green-button")
         self.addAttachmentButton.clicked.connect(self.addAttachment)
