@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QWidget, QLabel, QToolButton, QMenu, QDialog, QHBoxLayout, QMainWindow
+from PySide6.QtWidgets import (QWidget, QLabel, QToolButton, QMenu,
+                              QDialog, QHBoxLayout, QGridLayout, QSizePolicy, QMainWindow)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
 import qtawesome as qta
@@ -97,12 +98,32 @@ class ProjectHeader(QWidget):
                 [newName, self.projectData["id"]]
             )
 
+            mainWindow = self
+            while mainWindow and not isinstance(mainWindow, QMainWindow):
+                mainWindow = mainWindow.parent()
+            
+            if mainWindow and hasattr(mainWindow, '_currentProjectMenuEntry'):
+                menuEntry = mainWindow._currentProjectMenuEntry
+                if hasattr(menuEntry, 'name') and isinstance(menuEntry.name, QLabel):
+                    menuEntry.name.setText(newName)
+
         while self.parent().phasesLayout.count() > 0:
             item = self.parent().phasesLayout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
         
         self.parent().phases.clear()
+
+        newPhasesContainer = QWidget()
+        newPhasesContainer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        newPhasesContainer.setMinimumWidth(0)
+        phasesLayout = QGridLayout()
+        phasesLayout.setColumnStretch(0, 1)
+        newPhasesContainer.setLayout(phasesLayout)
+
+        self.parent().scrollArea.setWidget(newPhasesContainer)
+        self.parent().phasesContainer = newPhasesContainer
+        self.parent().phasesLayout = phasesLayout
 
         syncQuery, success = self.dbManager.executeQuery(
             """
@@ -116,6 +137,8 @@ class ProjectHeader(QWidget):
         
         if success:
             freshPhases: List = []
+            freshPhasesWidgets: List = []
+
             while syncQuery.next():
                 dbId: int = syncQuery.value("phaseId")
                 dbName: str = syncQuery.value("phaseName")
@@ -172,10 +195,15 @@ class ProjectHeader(QWidget):
                 }
 
                 widget = Phase(phaseData, self.dbManager, self.confManager)
-                self.parent().phasesLayout.addWidget(widget)
+                freshPhasesWidgets.append((dbId, widget))
                 self.parent().phases[dbId] = widget
 
                 freshPhases.append(phaseData)
+
+            for i, (dbId, widget) in enumerate(freshPhasesWidgets):
+                self.parent().phasesLayout.addWidget(widget, 0, i, 1, 1)
+                self.parent().phases[dbId] = widget
+                self.parent().phasesLayout.setColumnStretch(i, 1)
 
             self.projectData["phases"] = freshPhases
             self.projectData["name"] = newName
