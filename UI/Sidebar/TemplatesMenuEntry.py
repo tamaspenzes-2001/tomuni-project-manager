@@ -10,7 +10,7 @@ class TemplatesMenuEntry(QWidget):
         self.deleteButton.setIcon(qta.icon("ri.delete-bin-6-line"))
         self.deleteButton.clicked.connect(self.deleteTemplate)
         self.deleteButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.deleteButton.setProperty("class", "button red-button")
+        self.deleteButton.setProperty("class", "square-button red-button")
 
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.name)

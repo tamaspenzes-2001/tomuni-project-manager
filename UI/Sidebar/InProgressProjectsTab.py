@@ -32,7 +32,7 @@ class InProgressProjectsTab(QWidget):
         self.scrollArea.setWidgetResizable(True)
 
         self.createButton = QPushButton("Create project")
-        self.createButton.setProperty("class", "button blue-button")
+        self.createButton.setProperty("class", "square-button blue-button")
         self.createButton.clicked.connect(self.createProject)
 
         self.layout = QVBoxLayout()

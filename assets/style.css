@@ -34,28 +34,35 @@ QTabBar::tab:!selected {
     font-size: 17px;
 }
 
-.button {
+QPushButton {
+    padding: 4px;
+}
+
+.square-button {
     width: 20px;
     height: 20px;
-    padding: 4px;
 }
 
 .rounded-button {
     border: 1px solid grey;
     border-radius: 12px;
-    padding: 2px;
+    width: 15px;
+    height: 15px;
 }
 
 .blue-button {
-    background-color: #0d0da5;    
+    background-color: #0d0da5;
+    color: white;
 }
 
 .red-button {
     background-color: red;
+    color: white;
 }
 
 .green-button {
-    background-color: #106408;   
+    background-color: #106408;
+    color: white;
 }
 
 Task QCheckBox {
@@ -84,10 +91,6 @@ Task QCheckBox::indicator:checked {
     background-color: #106408;
 }
 
-QPushButton {
-    color: white;
-}
-
 QToolButton::menu-indicator {
     width: 0;
 }
@@ -98,8 +101,13 @@ QLineEdit, QTextEdit, QListWidget {
     border: 1px solid lightblue;
 }
 
+.dialog-button {
+    width: 70px;
+}
+
 .dark-red-button {
     background-color: #920f0f;
+    color: white;
 }
 
 .right-border {

@@ -21,7 +21,7 @@ class TaskArtifactSection(QWidget):
         self.addAttachmentButton = QPushButton("")
         self.addAttachmentButton.setIcon(qta.icon("ri.add-fill", color="white"))
         self.addAttachmentButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.addAttachmentButton.setProperty("class", "button green-button")
+        self.addAttachmentButton.setProperty("class", "square-button green-button")
         self.addAttachmentButton.clicked.connect(self.addAttachment)
         self.attachmentsLayout = QFlowLayout()
         if filePaths:

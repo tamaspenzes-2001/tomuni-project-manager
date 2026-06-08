@@ -20,7 +20,7 @@ class TemplatesSection(QWidget):
         self.menuScrollArea.setWidget(self.menu)
         self.menuScrollArea.setWidgetResizable(True)
         self.createButton = QPushButton("Create template")
-        self.createButton.setProperty("class", "button blue-button")
+        self.createButton.setProperty("class", "square-button blue-button")
         self.createButton.clicked.connect(self.createTemplate)
 
         self.layout = QVBoxLayout()

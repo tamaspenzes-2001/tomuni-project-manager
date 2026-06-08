@@ -42,7 +42,7 @@ class Phase(QWidget):
         self.scrollArea.setWidget(self.tasks)
 
         self.addTaskButton = QPushButton("Add task")
-        self.addTaskButton.setProperty("class", "button blue-button")
+        self.addTaskButton.setProperty("class", "square-button blue-button")
         self.addTaskButton.clicked.connect(self.addTask)
 
         self.layout = QVBoxLayout()
