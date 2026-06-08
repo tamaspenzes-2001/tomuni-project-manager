@@ -119,7 +119,7 @@ class InProgressProjectsMenuEntry(QWidget):
         while mainWindow and not isinstance(mainWindow, QMainWindow):
             mainWindow = mainWindow.parent()
         if mainWindow and hasattr(mainWindow, 'loadProject'):
-            mainWindow.loadProject(projectData)
+            mainWindow.loadProject(projectData, self)
 
     def _convertState(self, stateStr):
         match stateStr:

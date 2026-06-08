@@ -2,8 +2,10 @@ from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget, QDialog, QMessage
 from PySide6.QtCore import Qt, QByteArray
 from PySide6.QtGui import QPixmap
 from datetime import date
-from typing import List, Dict
+from typing import List, Dict, Union
 from UI.Sidebar.Sidebar import Sidebar
+from UI.Sidebar.InProgressProjectsMenuEntry import InProgressProjectsMenuEntry
+from UI.Sidebar.FinishedProjectsMenuEntry import FinishedProjectsMenuEntry
 from UI.Project.Project import Project
 from UI.Dialogs.SettingsDialog import SettingsDialog
 from helpers import assetPath
@@ -36,7 +38,7 @@ class AppUI(QMainWindow):
         self.aboutAction = self.aboutMenu.addAction("About TomUni")
         self.aboutAction.triggered.connect(self.showAbout)
 
-    def loadProject(self, projectData):
+    def loadProject(self, projectData: Dict, menuEntry: Union[InProgressProjectsMenuEntry, FinishedProjectsMenuEntry]=None):
         currentSizes: List = self.splitter.sizes()
         targetProjectWidth: int = currentSizes[1] if len(currentSizes) > 1 and currentSizes[1] > 0 else 600
 
@@ -48,6 +50,8 @@ class AppUI(QMainWindow):
         self.splitter.update()
         self.project: Project = project
         self.project.update()
+
+        self._currentProjectMenuEntry = menuEntry
 
     def modifySettings(self):
         dialog = SettingsDialog(self.confManager.config)
