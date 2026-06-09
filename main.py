@@ -8,7 +8,7 @@ from helpers import assetPath
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("TomUni")
-    app.setDesktopFileName("io.github.tamaspenzes-2001.tomuni")
+    app.setDesktopFileName("io.github.tamaspenzes2001.tomuni")
     app.setWindowIcon(QIcon(assetPath("logo.png")))
 
     with open(assetPath("style.css"), "r") as stylesheet:
