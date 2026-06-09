@@ -15,6 +15,7 @@ class TaskArtifactSection(QWidget):
 
         self.label = QLabel("Artifact templates" if templates else "Artifacts")
         self.labelLayout = QVBoxLayout()
+        self.labelLayout.addSpacing(13)
         self.labelLayout.addWidget(self.label)
         self.labelLayout.addStretch()
 
