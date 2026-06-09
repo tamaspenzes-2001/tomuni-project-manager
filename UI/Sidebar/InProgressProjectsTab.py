@@ -52,7 +52,7 @@ class InProgressProjectsTab(QWidget):
             newId: int = (int(maxId) + 1) if maxId else 1
 
             newProject = InProgressProjectsMenuEntry(dialog.resultName, newId, self.dbManager)
-            self.menuLayout.insertWidget(self.menuLayout.count() - 1, newProject)
+            self.menuLayout.insertWidget(0, newProject)
 
             dbOperations: list = []
             
